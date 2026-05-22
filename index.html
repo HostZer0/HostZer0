@@ -2737,7 +2737,7 @@ function onEditEmpresa(){
   const opts = (key, extra=[]) => { const set = new Set(extra); getAllEmpresasMerged().forEach(x=>{ if(x[key]) set.add(x[key]); }); return [...set].sort((a,b)=>String(a).localeCompare(String(b),'pt-BR')); };
   const taxRows = getTaxYearsForEmpresa(e).map(y=>taxYearRowHTML(y, e[`trib_${y}`] || '')).join('');
   const bpRows = getBalancoYearsForEmpresa(e).map(y=>bpYearRowHTML(y, e[`bp_${y}`] || '')).join('');
-  document.getElementById('modal-body').innerHTML = `<div class="form-note"><strong>Alterações são salvas localmente</strong> neste navegador. Exporte as alterações para backup quando finalizar.</div><div class="detail-grid">
+  document.getElementById('modal-body').innerHTML = `<div class="detail-grid">
     ${fieldSelectHTML('situacao','Situação',opts('situacao'),e.situacao)} ${fieldSelectHTML('classe','Classe',['PREMIUM','PLUS','BASIC'],e.classe)} ${fieldSelectHTML('responsavel','Responsável',opts('responsavel'),e.responsavel)} ${fieldSelectHTML('prioridade','Nível Prioridade',['1','2','3','4','5'],e.prioridade)} ${fieldSelectHTML('matriz_filial','Matriz/Filial',['MATRIZ','FILIAL'],e.matriz_filial)} ${fieldTextHTML('municipio','Município',e.municipio)}
     <div class="detail-section"><div class="detail-section-title">Tributação</div></div>
     <div class="dynamic-list" id="tax-years-box">${taxRows}</div>
@@ -3222,7 +3222,7 @@ function renderObligationForm(type, r, isNew){
   const cfg = OBR_FORM_CONFIG[type] || [];
   document.getElementById('modal-title').textContent = isNew ? `Novo Registro — ${OBLIGATION_LABELS[type]}` : `Editar Registro — ${OBLIGATION_LABELS[type]}`;
   document.getElementById('modal-cnpj').textContent = r.cnpj_fmt || r.cnpj || r.razao_social || r.empresa || OBLIGATION_LABELS[type];
-  document.getElementById('modal-body').innerHTML = `<div class="form-note">As inclusões, edições e exclusões são salvas localmente neste navegador. Use Exportar para backup das alterações.</div><div class="detail-grid">${cfg.map(f=>{
+  document.getElementById('modal-body').innerHTML = `<div class="detail-grid">${cfg.map(f=>{
     if(f.k === 'empresa' || f.k === 'razao_social') return fieldEmpresaSelectHTML(f.k, f.l, r[f.k], 'cnpj_fmt');
     if(f.k === 'grupo') return fieldGrupoSelectHTML(f.k, f.l, r[f.k]);
     return f.opts ? fieldSelectHTML(f.k,f.l,f.opts,r[f.k]) : fieldTextHTML(f.k,f.l,r[f.k]);
@@ -4378,7 +4378,8 @@ bootstrapExtras();
     createUser(userData)              { return this.call('create_user', { userData }); },
     updateUser(userId, changes)       { return this.call('update_user', { userId, changes }); },
     resetPassword(userId, newPassword){ return this.call('reset_password', { userId, newPassword }); },
-    changeMyPassword(oldP, newP)      { return this.call('change_my_password', { oldPassword: oldP, newPassword: newP }); }
+    changeMyPassword(oldP, newP)      { return this.call('change_my_password', { oldPassword: oldP, newPassword: newP }); },
+    setup(nome, email, senha)         { return this.call('setup', { nome, email, senha }); }
   };
 
   // ============================================================
@@ -4508,10 +4509,83 @@ bootstrapExtras();
           <input type="password" id="contad-senha" required autocomplete="current-password">
         </div>
         <button type="submit" class="contad-auth-btn" id="contad-login-btn">Entrar</button>
+        <p style="text-align:center;margin-top:14px;font-size:12px;color:#94a3b8">
+          Primeiro acesso?
+          <a href="#" id="contad-setup-link" style="color:#047857;font-weight:600;text-decoration:none">
+            Configurar sistema
+          </a>
+        </p>
+      </form>
+
+      <form class="contad-auth-card" id="contad-setup-form" autocomplete="off" style="display:none">
+        <div class="contad-auth-brand">
+          <div class="contad-auth-mark">CT</div>
+          <div>
+            <h1>Configuração Inicial</h1>
+            <p class="sub">Crie o primeiro administrador</p>
+          </div>
+        </div>
+        <div id="contad-setup-err"></div>
+        <div class="contad-auth-field">
+          <label for="contad-setup-nome">Nome completo</label>
+          <input type="text" id="contad-setup-nome" required>
+        </div>
+        <div class="contad-auth-field">
+          <label for="contad-setup-email">E-mail</label>
+          <input type="email" id="contad-setup-email" required>
+        </div>
+        <div class="contad-auth-field">
+          <label for="contad-setup-senha">Senha (mínimo 6 caracteres)</label>
+          <input type="password" id="contad-setup-senha" required minlength="6">
+        </div>
+        <button type="submit" class="contad-auth-btn" id="contad-setup-btn">Criar Administrador</button>
+        <p style="text-align:center;margin-top:14px;font-size:12px;color:#94a3b8">
+          <a href="#" id="contad-back-login" style="color:#047857;font-weight:600;text-decoration:none">
+            ← Voltar ao login
+          </a>
+        </p>
       </form>
     `;
     document.body.appendChild(overlay);
 
+    // Alternar entre formulário de login e setup
+    document.getElementById('contad-setup-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('contad-login-form').style.display = 'none';
+      document.getElementById('contad-setup-form').style.display = '';
+    });
+    document.getElementById('contad-back-login').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('contad-setup-form').style.display = 'none';
+      document.getElementById('contad-login-form').style.display = '';
+    });
+
+    // Submit do formulário de setup
+    document.getElementById('contad-setup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nome  = document.getElementById('contad-setup-nome').value.trim();
+      const email = document.getElementById('contad-setup-email').value.trim();
+      const senha = document.getElementById('contad-setup-senha').value;
+      const btn   = document.getElementById('contad-setup-btn');
+      const errBox = document.getElementById('contad-setup-err');
+      btn.disabled = true; btn.textContent = 'Criando…'; errBox.innerHTML = '';
+
+      const res = await api.setup(nome, email, senha);
+      if (!res.ok) {
+        errBox.innerHTML = `<div class="contad-auth-error">${escapeHTML(res.error || 'Falha ao criar administrador.')}</div>`;
+        btn.disabled = false; btn.textContent = 'Criar Administrador';
+        return;
+      }
+      errBox.innerHTML = `<div class="contad-auth-info">✓ ${escapeHTML(res.message || 'Administrador criado!')} Faça login agora.</div>`;
+      btn.disabled = false; btn.textContent = 'Criar Administrador';
+      setTimeout(() => {
+        document.getElementById('contad-setup-form').style.display = 'none';
+        document.getElementById('contad-login-form').style.display = '';
+        document.getElementById('contad-email').value = email;
+      }, 2000);
+    });
+
+    // Submit do formulário de login
     document.getElementById('contad-login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('contad-email').value.trim();
@@ -4583,99 +4657,488 @@ bootstrapExtras();
 
   // ============================================================
   // OVERRIDES DAS FUNÇÕES DE SALVAR/EXCLUIR
+  // Toda escrita passa pela API (Apps Script → Google Sheets).
+  // O localStorage só guarda rascunhos de itens "novo_*" ainda não persistidos.
   // ============================================================
+
+  // ---- Helper: toast / loader inline ----
+  function injectToastStyles() {
+    if (document.getElementById('contad-toast-styles')) return;
+    const s = document.createElement('style');
+    s.id = 'contad-toast-styles';
+    s.textContent = `
+      #contad-toast {
+        position: fixed; bottom: 24px; right: 24px;
+        background: #0f172a; color: #fff;
+        padding: 12px 20px; border-radius: 8px;
+        font-size: 13px; font-weight: 600;
+        box-shadow: 0 10px 25px rgba(0,0,0,.25);
+        z-index: 99998; display: none;
+        align-items: center; gap: 10px;
+        font-family: 'Manrope', system-ui, sans-serif;
+        max-width: 380px;
+      }
+      #contad-toast.show { display: inline-flex; }
+      #contad-toast.success { background: #047857; }
+      #contad-toast.error { background: #dc2626; }
+      #contad-toast.loading { background: #0f172a; }
+      #contad-toast svg.spin { animation: contad-spin .8s linear infinite; }
+      @keyframes contad-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    `;
+    document.head.appendChild(s);
+  }
+  function showToast(msg, type) {
+    injectToastStyles();
+    let t = document.getElementById('contad-toast');
+    if (!t) { t = document.createElement('div'); t.id = 'contad-toast'; document.body.appendChild(t); }
+    t.className = 'show ' + (type || 'info');
+    t.innerHTML = (type === 'loading'
+      ? '<svg class="spin" width="16" height="16" viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-dasharray="80" stroke-dashoffset="60"/></svg>'
+      : '') + escapeHTML(msg);
+    clearTimeout(t._timer);
+    if (type !== 'loading') {
+      t._timer = setTimeout(() => { t.classList.remove('show'); }, 2500);
+    }
+  }
+  function hideToast() {
+    const t = document.getElementById('contad-toast');
+    if (t) { clearTimeout(t._timer); t.classList.remove('show'); }
+  }
+  // Expor pra fora do IIFE caso precise
+  window.contadToast = showToast;
+  window.contadToastHide = hideToast;
+
+  // ---- Helper: coletar campos do modal ----
+  function collectFields() {
+    const data = {};
+    document.querySelectorAll('#modal-body [name]').forEach(f => {
+      const v = (f.value || '').trim();
+      data[f.name] = v === '' ? null : v;
+    });
+    return data;
+  }
+
   function installOverrides() {
-    // --- Obrigações (efd_reinf, defis, ecd_ecf, dist_lucros, despesas) ---
+
+    // ============================================================
+    // EMPRESAS
+    // ============================================================
+
+    // Editar empresa existente (botão Salvar no modo edição do modal)
+    window.onSaveEdit = async function () {
+      const ms = window.modalState;
+      const orig = window.DATA.empresas[ms.index];
+      if (!orig || !orig.id) {
+        showToast('Empresa sem ID. Recarregue a página.', 'error');
+        return;
+      }
+      const data = collectFields();
+
+      showToast('Salvando empresa…', 'loading');
+      const res = await api.update('empresas', orig.id, data);
+      hideToast();
+
+      if (!res.ok) { showToast('Erro: ' + res.error, 'error'); return; }
+
+      window.DATA.empresas[ms.index] = res.row;
+      // Limpa qualquer rascunho local antigo
+      if (window.editsState && window.editsState.empresa) {
+        delete window.editsState.empresa[orig.cnpj];
+        if (typeof window.saveEdits === 'function') window.saveEdits();
+      }
+      showToast('Empresa atualizada ✓', 'success');
+      ms.editing = false;
+      window.renderEmpresaModal();
+      if (typeof window.refreshAllFilterOptions === 'function') window.refreshAllFilterOptions();
+      if (typeof window.refreshCurrentView === 'function') window.refreshCurrentView();
+    };
+
+    // "Desfazer alterações" → não faz mais sentido (não há mais rascunho local)
+    // Esconde o botão; se chamada por reflex, só fecha o modal.
+    window.onClearEdit = function () {
+      // Nada a desfazer — tudo já está no servidor.
+      // Mantemos como no-op para não quebrar onclick antigos.
+      if (typeof window.closeModal === 'function') window.closeModal();
+    };
+
+    // Criar nova empresa (chamada via validateAndSaveEmpresa)
+    window.saveEmpresaModal = async function () {
+      const ms = window.modalState;
+      const data = collectFields();
+
+      showToast('Cadastrando empresa…', 'loading');
+
+      if (ms.isNew) {
+        delete data.id;
+        const res = await api.insert('empresas', data);
+        hideToast();
+        if (!res.ok) { showToast('Erro: ' + res.error, 'error'); return; }
+        if (!Array.isArray(window.DATA.empresas)) window.DATA.empresas = [];
+        window.DATA.empresas.push(res.row);
+        showToast('Empresa cadastrada ✓', 'success');
+      } else {
+        const orig = window.DATA.empresas[ms.index] || {};
+        if (!orig.id) { hideToast(); showToast('Empresa sem ID', 'error'); return; }
+        const res = await api.update('empresas', orig.id, data);
+        hideToast();
+        if (!res.ok) { showToast('Erro: ' + res.error, 'error'); return; }
+        window.DATA.empresas[ms.index] = res.row;
+        showToast('Empresa atualizada ✓', 'success');
+      }
+      window.closeModal();
+      if (typeof window.refreshAllFilterOptions === 'function') window.refreshAllFilterOptions();
+      if (typeof window.refreshCurrentView === 'function') window.refreshCurrentView();
+    };
+
+    // ============================================================
+    // PENDÊNCIAS
+    // ============================================================
+
+    window.savePendenciaModal = async function () {
+      const ms = window.modalState;
+      const data = collectFields();
+      showToast('Salvando pendência…', 'loading');
+
+      if (ms.isNew) {
+        delete data.id;
+        const res = await api.insert('pendencias', data);
+        hideToast();
+        if (!res.ok) { showToast('Erro: ' + res.error, 'error'); return; }
+        if (!Array.isArray(window.DATA.pendencias)) window.DATA.pendencias = [];
+        window.DATA.pendencias.push(res.row);
+        // Remove rascunho local
+        if (window.editsState && window.editsState.pendenciaNew) {
+          delete window.editsState.pendenciaNew[ms.key];
+          if (typeof window.saveEdits === 'function') window.saveEdits();
+        }
+        showToast('Pendência criada ✓', 'success');
+      } else {
+        const orig = (window.DATA.pendencias || []).find(p => String(p.id) === String(ms.key));
+        if (!orig) { hideToast(); showToast('Pendência não encontrada', 'error'); return; }
+        const res = await api.update('pendencias', orig.id, data);
+        hideToast();
+        if (!res.ok) { showToast('Erro: ' + res.error, 'error'); return; }
+        const idx = window.DATA.pendencias.findIndex(p => p.id === orig.id);
+        if (idx >= 0) window.DATA.pendencias[idx] = res.row;
+        if (window.editsState && window.editsState.pendencia) {
+          delete window.editsState.pendencia[orig.id];
+          if (typeof window.saveEdits === 'function') window.saveEdits();
+        }
+        showToast('Pendência atualizada ✓', 'success');
+      }
+
+      window.closeModal();
+      if (typeof window.refreshAllFilterOptions === 'function') window.refreshAllFilterOptions();
+      if (window.currentView === 'pendencias' && typeof window.renderPendencias === 'function') window.renderPendencias();
+    };
+
+    window.deletePendencia = async function (key) {
+      // Rascunho local (nunca enviado): só remove do estado
+      if (String(key).startsWith('novo_')) {
+        if (window.editsState && window.editsState.pendenciaNew) {
+          delete window.editsState.pendenciaNew[key];
+          if (typeof window.saveEdits === 'function') window.saveEdits();
+        }
+        if (typeof window.refreshAllFilterOptions === 'function') window.refreshAllFilterOptions();
+        if (window.currentView === 'pendencias' && typeof window.renderPendencias === 'function') window.renderPendencias();
+        return;
+      }
+
+      if (!confirm('Excluir esta pendência permanentemente?')) return;
+      if (!canDelete()) { showToast('Apenas administradores podem excluir', 'error'); return; }
+
+      showToast('Excluindo…', 'loading');
+      const res = await api.remove('pendencias', key);
+      hideToast();
+      if (!res.ok) { showToast('Erro: ' + res.error, 'error'); return; }
+
+      window.DATA.pendencias = (window.DATA.pendencias || []).filter(p => String(p.id) !== String(key));
+      showToast('Pendência excluída ✓', 'success');
+      if (typeof window.refreshAllFilterOptions === 'function') window.refreshAllFilterOptions();
+      if (window.currentView === 'pendencias' && typeof window.renderPendencias === 'function') window.renderPendencias();
+    };
+
+    window.updatePendStatus = async function (key, newStatus) {
+      // Rascunho local
+      if (String(key).startsWith('novo_')) {
+        if (window.editsState && window.editsState.pendenciaNew && window.editsState.pendenciaNew[key]) {
+          window.editsState.pendenciaNew[key].status = newStatus;
+          if (typeof window.saveEdits === 'function') window.saveEdits();
+        }
+        if (typeof window.initPendFilters === 'function') window.initPendFilters();
+        if (typeof window.renderPendencias === 'function') window.renderPendencias();
+        return;
+      }
+
+      const data = { status: newStatus };
+      if (/^Conclu/i.test(newStatus)) {
+        data.data_conclusao = new Date().toISOString().slice(0, 10);
+      }
+
+      showToast('Atualizando status…', 'loading');
+      const res = await api.update('pendencias', key, data);
+      hideToast();
+      if (!res.ok) { showToast('Erro: ' + res.error, 'error'); return; }
+
+      const idx = (window.DATA.pendencias || []).findIndex(p => String(p.id) === String(key));
+      if (idx >= 0) window.DATA.pendencias[idx] = res.row;
+      showToast('Status salvo ✓', 'success');
+      if (typeof window.initPendFilters === 'function') window.initPendFilters();
+      if (typeof window.renderPendencias === 'function') window.renderPendencias();
+    };
+
+    // ============================================================
+    // METAS  (modalState.key = índice em DATA.metas, ou "novo_*")
+    // ============================================================
+
+    window.saveMetaModal = async function () {
+      const ms = window.modalState;
+      const data = collectFields();
+      showToast('Salvando meta…', 'loading');
+
+      if (ms.isNew) {
+        delete data.id;
+        const res = await api.insert('metas', data);
+        hideToast();
+        if (!res.ok) { showToast('Erro: ' + res.error, 'error'); return; }
+        if (!Array.isArray(window.DATA.metas)) window.DATA.metas = [];
+        window.DATA.metas.push(res.row);
+        if (window.editsState && window.editsState.metaNew) {
+          delete window.editsState.metaNew[ms.key];
+          if (typeof window.saveEdits === 'function') window.saveEdits();
+        }
+        showToast('Meta criada ✓', 'success');
+      } else {
+        const idx = Number(ms.key);
+        const orig = (window.DATA.metas || [])[idx];
+        if (!orig || !orig.id) { hideToast(); showToast('Meta sem ID', 'error'); return; }
+        const res = await api.update('metas', orig.id, data);
+        hideToast();
+        if (!res.ok) { showToast('Erro: ' + res.error, 'error'); return; }
+        window.DATA.metas[idx] = res.row;
+        if (window.editsState && window.editsState.meta) {
+          delete window.editsState.meta[String(idx)];
+          if (typeof window.saveEdits === 'function') window.saveEdits();
+        }
+        showToast('Meta atualizada ✓', 'success');
+      }
+
+      window.closeModal();
+      if (typeof window.refreshAllFilterOptions === 'function') window.refreshAllFilterOptions();
+      if (window.currentView === 'metas' && typeof window.renderMetas === 'function') window.renderMetas();
+    };
+
+    window.deleteMeta = async function (key) {
+      if (String(key).startsWith('novo_')) {
+        if (window.editsState && window.editsState.metaNew) {
+          delete window.editsState.metaNew[key];
+          if (typeof window.saveEdits === 'function') window.saveEdits();
+        }
+        if (typeof window.refreshAllFilterOptions === 'function') window.refreshAllFilterOptions();
+        if (window.currentView === 'metas' && typeof window.renderMetas === 'function') window.renderMetas();
+        return;
+      }
+
+      if (!confirm('Excluir esta meta permanentemente?')) return;
+      if (!canDelete()) { showToast('Apenas administradores podem excluir', 'error'); return; }
+
+      const idx = Number(key);
+      const orig = (window.DATA.metas || [])[idx];
+      if (!orig || !orig.id) { showToast('Meta sem ID', 'error'); return; }
+
+      showToast('Excluindo…', 'loading');
+      const res = await api.remove('metas', orig.id);
+      hideToast();
+      if (!res.ok) { showToast('Erro: ' + res.error, 'error'); return; }
+
+      window.DATA.metas.splice(idx, 1);
+      showToast('Meta excluída ✓', 'success');
+      if (typeof window.refreshAllFilterOptions === 'function') window.refreshAllFilterOptions();
+      if (window.currentView === 'metas' && typeof window.renderMetas === 'function') window.renderMetas();
+    };
+
+    window.updateMetaStatus = async function (key, newStatus) {
+      // Rascunho local
+      if (String(key).startsWith('novo_')) {
+        if (window.editsState && window.editsState.metaNew && window.editsState.metaNew[key]) {
+          window.editsState.metaNew[key].realizado = newStatus;
+          if (/^SIM$/i.test(newStatus)) {
+            window.editsState.metaNew[key].data_finalizacao = new Date().toISOString().slice(0, 10);
+          }
+          if (typeof window.saveEdits === 'function') window.saveEdits();
+        }
+        if (typeof window.initMetasFilters === 'function') window.initMetasFilters();
+        if (typeof window.renderMetas === 'function') window.renderMetas();
+        return;
+      }
+
+      const idx = Number(key);
+      const orig = (window.DATA.metas || [])[idx];
+      if (!orig || !orig.id) { showToast('Meta sem ID', 'error'); return; }
+
+      const data = { realizado: newStatus };
+      if (/^SIM$/i.test(newStatus)) {
+        data.data_finalizacao = new Date().toISOString().slice(0, 10);
+      }
+
+      showToast('Atualizando status…', 'loading');
+      const res = await api.update('metas', orig.id, data);
+      hideToast();
+      if (!res.ok) { showToast('Erro: ' + res.error, 'error'); return; }
+
+      window.DATA.metas[idx] = res.row;
+      showToast('Status salvo ✓', 'success');
+      if (typeof window.initMetasFilters === 'function') window.initMetasFilters();
+      if (typeof window.renderMetas === 'function') window.renderMetas();
+    };
+
+    // ============================================================
+    // OBRIGAÇÕES (efd_reinf, defis, ecd_ecf, dist_lucros, despesas)
+    // ============================================================
+
     window.saveObligationModal = async function () {
       const ms = window.modalState;
       if (!ms) return;
       const type = ms.obType;
-      const data = window.collectModalFields();
+      const data = collectFields();
 
-      // somar despesas se aplicável
+      // Soma automática de despesas mensais
       if (type === 'despesas' && window.MONTH_KEYS) {
-        const sum = window.MONTH_KEYS.reduce((s,k)=>s+(Number(String(data[k]||'').replace(',','.'))||0),0);
+        const sum = window.MONTH_KEYS.reduce((s, k) => s + (Number(String(data[k] || '').replace(',', '.')) || 0), 0);
         if (!data.total && sum) data.total = String(sum);
       }
 
+      showToast('Salvando registro…', 'loading');
+
       if (ms.isNew) {
+        delete data.id;
         const res = await api.insert(type, data);
-        if (!res.ok) { alert('Erro ao salvar: ' + res.error); return; }
+        hideToast();
+        if (!res.ok) { showToast('Erro: ' + res.error, 'error'); return; }
         if (!window.DATA[type]) window.DATA[type] = [];
         window.DATA[type].push(res.row);
+        if (window.editsState && window.editsState[type + 'New']) {
+          delete window.editsState[type + 'New'][ms.key];
+          if (typeof window.saveEdits === 'function') window.saveEdits();
+        }
+        showToast('Registro criado ✓', 'success');
       } else {
-        // localizar o id real do registro
         const rec = window.getObRecordByKey(type, ms.key) || {};
         const realId = rec.id;
-        if (!realId) { alert('Registro sem ID — não é possível atualizar.'); return; }
+        if (!realId) { hideToast(); showToast('Registro sem ID', 'error'); return; }
         const res = await api.update(type, realId, data);
-        if (!res.ok) { alert('Erro ao atualizar: ' + res.error); return; }
-        // refletir na DATA local
+        hideToast();
+        if (!res.ok) { showToast('Erro: ' + res.error, 'error'); return; }
         const arr = window.DATA[type] || [];
         const idx = arr.findIndex(r => r.id === realId);
         if (idx >= 0) arr[idx] = res.row;
+        if (window.editsState && window.editsState[type]) {
+          delete window.editsState[type][ms.key];
+          if (typeof window.saveEdits === 'function') window.saveEdits();
+        }
+        showToast('Registro atualizado ✓', 'success');
       }
+
       window.closeModal();
+      if (typeof window.refreshAllFilterOptions === 'function') window.refreshAllFilterOptions();
       if (typeof window.refreshCurrentView === 'function') window.refreshCurrentView();
     };
 
     window.deleteObligation = async function (type, key) {
-      if (!confirm('Confirma a exclusão deste registro?')) return;
       const rec = window.getObRecordByKey(type, key) || {};
       const realId = rec.id;
-      if (!realId) {
-        // novo registro ainda não enviado: remover localmente
-        if (window.editsState && window.editsState[type + 'New']) delete window.editsState[type + 'New'][key];
-      } else {
-        const res = await api.remove(type, realId);
-        if (!res.ok) { alert('Erro ao excluir: ' + res.error); return; }
-        window.DATA[type] = (window.DATA[type] || []).filter(r => r.id !== realId);
+
+      // Rascunho local
+      if (String(key).startsWith('novo_') || !realId) {
+        if (window.editsState && window.editsState[type + 'New']) {
+          delete window.editsState[type + 'New'][key];
+          if (typeof window.saveEdits === 'function') window.saveEdits();
+        }
+        if (typeof window.refreshCurrentView === 'function') window.refreshCurrentView();
+        return;
       }
+
+      if (!confirm('Excluir este registro permanentemente?')) return;
+      if (!canDelete()) { showToast('Apenas administradores podem excluir', 'error'); return; }
+
+      showToast('Excluindo…', 'loading');
+      const res = await api.remove(type, realId);
+      hideToast();
+      if (!res.ok) { showToast('Erro: ' + res.error, 'error'); return; }
+
+      window.DATA[type] = (window.DATA[type] || []).filter(r => r.id !== realId);
+      showToast('Registro excluído ✓', 'success');
+      if (typeof window.refreshAllFilterOptions === 'function') window.refreshAllFilterOptions();
       if (typeof window.refreshCurrentView === 'function') window.refreshCurrentView();
     };
 
-    // --- Empresas (se existir no seu HTML) ---
-    if (typeof window.saveEmpresaModal === 'function') {
-      window.saveEmpresaModal = async function () {
-        const ms = window.modalState;
-        const data = window.collectModalFields();
-        if (ms.isNew) {
-          const res = await api.insert('empresas', data);
-          if (!res.ok) return alert('Erro: ' + res.error);
-          window.DATA.empresas.push(res.row);
-        } else {
-          const rec = window.DATA.empresas[Number(ms.key)] || {};
-          const res = await api.update('empresas', rec.id, data);
-          if (!res.ok) return alert('Erro: ' + res.error);
-          window.DATA.empresas[Number(ms.key)] = res.row;
-        }
-        window.closeModal();
-        if (typeof window.refreshCurrentView === 'function') window.refreshCurrentView();
-      };
-    }
+    // ============================================================
+    // SÓCIOS (agora persistem no Sheets, tabela 'socios')
+    // ============================================================
 
-    // --- Pendências e Metas (genérico) ---
-    ['savePendencia','saveMeta'].forEach(fn => {
-      if (typeof window[fn] !== 'function') return;
-      const tableMap = { savePendencia: 'pendencias', saveMeta: 'metas' };
-      const table = tableMap[fn];
-      window[fn] = async function () {
-        const ms = window.modalState;
-        const data = window.collectModalFields();
-        if (ms.isNew) {
-          const res = await api.insert(table, data);
-          if (!res.ok) return alert('Erro: ' + res.error);
-          window.DATA[table].push(res.row);
-        } else {
-          const rec = window.DATA[table][Number(ms.key)] || {};
-          const res = await api.update(table, rec.id, data);
-          if (!res.ok) return alert('Erro: ' + res.error);
-          window.DATA[table][Number(ms.key)] = res.row;
-        }
-        window.closeModal();
-        if (typeof window.refreshCurrentView === 'function') window.refreshCurrentView();
-      };
-    });
+    // loadSocios passa a ler de DATA.socios (carregado no bootstrap)
+    window.loadSocios = function () {
+      return (window.DATA && Array.isArray(window.DATA.socios)) ? window.DATA.socios : [];
+    };
+    // saveSociosAll vira no-op (cada socio é salvo individualmente via API)
+    window.saveSociosAll = function () { /* persistência agora via API */ };
+
+    window.saveSocioModal = async function () {
+      const ctx = window.socioModalCtx || {};
+      const data = collectFields();
+      if (!data.nome) { alert('Nome é obrigatório.'); return; }
+
+      showToast('Salvando sócio…', 'loading');
+
+      if (ctx.isNew) {
+        delete data.id;
+        data.empresa_cnpj = ctx.empresaCnpj || data.empresa_cnpj;
+        // Tenta associar empresa_id
+        const norm = s => String(s || '').replace(/\D/g, '');
+        const empresa = (window.DATA.empresas || []).find(e =>
+          norm(e.cnpj) === norm(data.empresa_cnpj) ||
+          norm(e.cnpj_fmt) === norm(data.empresa_cnpj)
+        );
+        if (empresa) data.empresa_id = empresa.id;
+
+        const res = await api.insert('socios', data);
+        hideToast();
+        if (!res.ok) { showToast('Erro: ' + res.error, 'error'); return; }
+        if (!Array.isArray(window.DATA.socios)) window.DATA.socios = [];
+        window.DATA.socios.push(res.row);
+        showToast('Sócio criado ✓', 'success');
+      } else {
+        const orig = (window.DATA.socios || []).find(s => s.id === ctx.id);
+        if (!orig) { hideToast(); showToast('Sócio não encontrado', 'error'); return; }
+        const res = await api.update('socios', orig.id, data);
+        hideToast();
+        if (!res.ok) { showToast('Erro: ' + res.error, 'error'); return; }
+        const idx = window.DATA.socios.findIndex(s => s.id === orig.id);
+        if (idx >= 0) window.DATA.socios[idx] = res.row;
+        showToast('Sócio atualizado ✓', 'success');
+      }
+
+      if (typeof window.closeSocioModal === 'function') window.closeSocioModal();
+    };
+
+    window.deleteSocio = async function (id) {
+      if (!id) return;
+      if (!confirm('Excluir este sócio permanentemente?')) return;
+      if (!canDelete()) { showToast('Apenas administradores podem excluir', 'error'); return; }
+
+      showToast('Excluindo sócio…', 'loading');
+      const res = await api.remove('socios', id);
+      hideToast();
+      if (!res.ok) { showToast('Erro: ' + res.error, 'error'); return; }
+
+      window.DATA.socios = (window.DATA.socios || []).filter(s => s.id !== id);
+      showToast('Sócio excluído ✓', 'success');
+
+      // Se está no modal da empresa, re-renderiza pra atualizar a lista
+      if (window.modalState && window.modalState.type === 'empresa' && window.modalState.index != null && !window.socioModalCtx) {
+        if (typeof window.renderEmpresaModal === 'function') window.renderEmpresaModal();
+      }
+    };
   }
 
   // ============================================================
@@ -4765,9 +5228,25 @@ bootstrapExtras();
         if (txt.includes('novo') || txt.includes('adicionar') || txt.includes('importar')) b.style.display = 'none';
       });
     }
-    // Esconder coluna/botões de exclusão para quem não pode deletar
+    // Esconder botões de exclusão para quem não pode deletar
     if (!canDelete()) {
-      document.querySelectorAll('[onclick*="deleteObligation"]').forEach(b => b.style.display = 'none');
+      const style = document.createElement('style');
+      style.id = 'contad-no-delete-style';
+      style.textContent = `
+        [onclick*="deleteObligation"],
+        [onclick*="deletePendencia"],
+        [onclick*="deleteMeta"],
+        [onclick*="deleteSocio"],
+        [onclick*="deleteEmpresa"],
+        .btn-icon.danger { display: none !important; }
+      `;
+      document.head.appendChild(style);
+    }
+    // Esconder botão "Desfazer alterações" do modal de empresa (não há mais rascunho local)
+    const undoBtn = document.getElementById('modal-clear-btn');
+    if (undoBtn) {
+      // Será mostrado somente quando o contexto for sócio/obrigação/pendência/meta como "Excluir"
+      // Para empresa em modo visualização, fica oculto.
     }
     // CSS pra ocultar elementos com data-role-only
     const style = document.createElement('style');
