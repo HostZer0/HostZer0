@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CONTAD · Escala de Trabalho</title>
+<meta name="description" content="Escala de trabalho conferida pelas regras da EC 141/2026 (fim da escala 6x1).">
+<meta name="theme-color" content="#0c1729">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Escala">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --sidebar: #0c1729;
+  --border: #e5e8ee;
+  --text: #0f172a;
+  --text-dim: #64748b;
+  --text-light: #94a3b8;
+  --brand: #047857;
+  --brand-2: #059669;
+  --brand-soft: #d1fae5;
+  --accent: #d97706;
+  --danger: #dc2626;
+  --danger-soft: #fee2e2;
+  --warning: #f59e0b;
+  --warning-soft: #fef3c7;
+  --info: #2563eb;
+  --info-soft: #dbeafe;
+  --shadow: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+  --shadow-lg: 0 10px 25px -5px rgba(15,23,42,.12), 0 8px 10px -6px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+
+/* Header */
+.top{background:var(--sidebar);color:#cbd5e1;padding:14px max(24px, env(safe-area-inset-right)) 14px max(24px, env(safe-area-inset-left));display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand-mark{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#10b981,#047857);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff}
+.top h1{font-size:16px;color:#fff;font-weight:800;letter-spacing:.01em}
+.top p{font-size:12px;color:#94a3b8}
+.top .back{margin-left:auto;color:#34d399;text-decoration:none;font-weight:600;font-size:13px}
+.top .back:hover{text-decoration:underline}
+
+.wrap{max-width:1500px;margin:0 auto;padding:20px max(24px, env(safe-area-inset-right)) calc(60px + env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left))}
+
+/* Convite para instalar */
+.install-bar{display:flex;align-items:center;gap:10px;background:var(--brand-soft);border:1px solid #a7f3d0;color:#065f46;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:13px;font-weight:600}
+.install-bar span{flex:1}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:18px 20px;margin-bottom:18px}
+.card h2{font-size:15px;font-weight:800;margin-bottom:4px}
+.card .sub{color:var(--text-dim);font-size:12.5px}
+
+/* Law timeline */
+.law{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+.step{border:1px solid var(--border);border-radius:10px;padding:12px 14px;position:relative;background:#fbfcfd}
+.step .when{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);font-weight:700}
+.step .what{font-size:20px;font-weight:800;margin:2px 0}
+.step .det{font-size:12px;color:var(--text-dim)}
+.step.now{border-color:var(--brand);background:var(--brand-soft)}
+.step.now::before{content:'vigente no mês exibido';display:inline-block;margin-bottom:6px;padding:1px 8px;border-radius:999px;background:var(--brand);color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.note{margin-top:12px;font-size:12px;color:var(--text-dim);background:#f8fafc;border:1px dashed var(--border);border-radius:8px;padding:10px 12px}
+.note strong{color:var(--text)}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto}
+.tabs button{background:none;border:none;padding:10px 14px;font:inherit;font-weight:600;color:var(--text-dim);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button.active{color:var(--brand);border-bottom-color:var(--brand)}
+.tab{display:none}.tab.active{display:block}
+
+/* Buttons / inputs */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border:1px solid var(--border);background:var(--surface);border-radius:8px;font:inherit;font-size:13px;font-weight:600;color:var(--text);cursor:pointer}
+.btn:hover{border-color:#cbd5e1;background:#f8fafc}
+.btn-primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn-primary:hover{background:var(--brand-2);border-color:var(--brand-2)}
+.btn-danger{color:var(--danger);border-color:#fecaca}
+.btn-sm{padding:5px 9px;font-size:12px}
+input,select{font:inherit;font-size:13px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text)}
+input:focus,select:focus{outline:2px solid var(--brand-soft);border-color:var(--brand)}
+label{font-size:12px;font-weight:600;color:var(--text-dim);display:flex;flex-direction:column;gap:4px}
+label.chk{flex-direction:row;align-items:center;gap:7px;color:var(--text)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.toolbar .spacer{flex:1}
+.month-nav{display:flex;align-items:center;gap:6px}
+.month-nav strong{min-width:150px;text-align:center;font-size:15px}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.kpi .v{font-size:22px;font-weight:800}
+.kpi .l{font-size:12px;color:var(--text-dim)}
+.kpi.err .v{color:var(--danger)}.kpi.warn .v{color:var(--accent)}.kpi.ok .v{color:var(--brand)}
+
+/* Grid */
+.grid-wrap{overflow:auto;border:1px solid var(--border);border-radius:10px;background:var(--surface);max-height:70vh}
+table.grid{border-collapse:separate;border-spacing:0;font-size:12px;min-width:100%}
+.grid th,.grid td{border-bottom:1px solid var(--border);text-align:center;padding:0;white-space:nowrap}
+.grid thead th{position:sticky;top:0;background:#f8fafc;z-index:2;font-weight:700;padding:6px 2px;font-size:11px;color:var(--text-dim)}
+.grid thead th .n{display:block;font-size:13px;color:var(--text)}
+.grid th.name,.grid td.name{position:sticky;left:0;background:var(--surface);z-index:1;text-align:left;padding:6px 12px;min-width:190px;border-right:1px solid var(--border)}
+.grid thead th.name{z-index:3;background:#f8fafc}
+.grid td.name b{display:block;font-size:13px;color:var(--text)}
+.grid td.name span{font-size:11px;color:var(--text-dim)}
+.grid .wk{border-left:2px solid #cbd5e1}
+.grid th.dom{color:var(--danger)}
+.grid th.fer{background:#fff7ed}
+.grid th.out,.grid td.out{opacity:.45}
+.grid td.c{min-width:38px;height:40px;cursor:pointer;position:relative;font-weight:700;font-size:11px}
+.grid td.c:hover{filter:brightness(.95)}
+.c-T{background:#ecfdf5;color:#065f46}
+.c-F{background:#f1f5f9;color:#475569}
+.c-FR{background:#fff7ed;color:#9a3412}
+.c-FE{background:#eff6ff;color:#1d4ed8}
+.c-AT{background:#f5f3ff;color:#6d28d9}
+.c-FT{background:#fef2f2;color:#b91c1c}
+.grid td.c.ov::before{content:'';position:absolute;top:3px;left:3px;width:5px;height:5px;border-radius:50%;background:#64748b}
+.grid td.c.m-erro{box-shadow:inset 0 0 0 2px var(--danger)}
+.grid td.c.m-aviso{box-shadow:inset 0 0 0 2px var(--warning)}
+.grid td.c.m-info{box-shadow:inset 0 0 0 2px #93c5fd}
+.grid td.tot,.grid th.tot{padding:6px 10px;font-weight:700;border-left:1px solid var(--border);background:#fbfcfd}
+.grid tfoot td{background:#f8fafc;font-weight:700;padding:6px 2px;position:sticky;bottom:0}
+.grid tfoot td.low{color:var(--danger);background:var(--danger-soft)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--text-dim);margin:10px 0 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:16px;height:16px;border-radius:4px;border:1px solid var(--border)}
+
+/* Alerts */
+.alerts{margin-top:16px}
+.alerts-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.alerts-head h3{font-size:14px;font-weight:800;margin-right:auto}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid transparent;cursor:pointer;background:#f1f5f9;color:var(--text-dim)}
+.pill.on{border-color:currentColor}
+.pill.erro{background:var(--danger-soft);color:var(--danger)}
+.pill.aviso{background:var(--warning-soft);color:#b45309}
+.pill.info{background:var(--info-soft);color:var(--info)}
+.alert{display:grid;grid-template-columns:72px 180px 1fr;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border);font-size:13px;align-items:start}
+.alert:last-child{border-bottom:none}
+.alert .lv{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.alert.erro .lv{color:var(--danger)}.alert.aviso .lv{color:#b45309}.alert.info .lv{color:var(--info)}
+.alert .who{font-weight:700}
+.alert .base{display:block;font-size:11px;color:var(--text-light);margin-top:2px}
+.empty{padding:20px;text-align:center;color:var(--text-dim)}
+
+/* Tables */
+table.list{width:100%;border-collapse:collapse;font-size:13px}
+.list th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);padding:8px 10px;border-bottom:1px solid var(--border);background:#f8fafc}
+.list td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.list td.num{text-align:right;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11.5px;font-weight:700}
+.tag.ok{background:var(--brand-soft);color:var(--brand)}
+.tag.bad{background:var(--danger-soft);color:var(--danger)}
+.tag.warn{background:var(--warning-soft);color:#b45309}
+.table-scroll{overflow-x:auto}
+
+/* Form */
+.form{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.form .full{grid-column:1/-1}
+.days{display:flex;gap:6px;flex-wrap:wrap}
+.days label{flex-direction:row;align-items:center;gap:4px;border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text)}
+.help{font-size:11.5px;color:var(--text-light);font-weight:500}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal{background:var(--surface);border-radius:14px;box-shadow:var(--shadow-lg);width:100%;max-width:420px;padding:20px}
+.modal h3{font-size:16px;font-weight:800}
+.modal p{color:var(--text-dim);font-size:12.5px;margin-bottom:12px}
+.codes{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.codes button{border:1px solid var(--border);border-radius:8px;padding:8px 4px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.codes button.sel{outline:2px solid var(--brand);outline-offset:1px}
+.times{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.modal-actions{display:flex;gap:8px;align-items:center}
+
+@media (max-width:900px){
+  .law,.kpis{grid-template-columns:repeat(2,1fr)}
+  .form{grid-template-columns:repeat(2,1fr)}
+  .alert{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  .wrap{padding:16px}
+  .top{padding:12px 16px}
+  .law,.kpis,.form{grid-template-columns:1fr}
+}
+@media print{
+  @page{size:A4 landscape;margin:8mm}
+  body{background:#fff}
+  .no-print,.top,.tabs,.toolbar,.kpis,.alerts,#law-card{display:none!important}
+  .wrap{padding:0;max-width:none}
+  .tab{display:none!important}
+  #tab-escala{display:block!important}
+  .grid-wrap{max-height:none;overflow:visible;border:none}
+  .grid th.name,.grid td.name,.grid thead th,.grid tfoot td{position:static}
+  .print-head{display:block!important;margin-bottom:8px}
+  table.grid{font-size:9px}
+  .grid td.c{min-width:0;height:24px}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+.print-head{display:none}
+.in-app .back,.no-contad .back{display:none}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand-mark">C</div>
+  <div>
+    <h1>Escala de Trabalho</h1>
+    <p>Departamento Pessoal · atualizado para a EC 141/2026 (fim da escala 6x1)</p>
+  </div>
+  <a class="back" href="../index.html">← Voltar ao CONTAD</a>
+</header>
+
+<div class="wrap">
+
+  <div class="install-bar no-print" id="install-bar" hidden>
+    <span id="install-text"></span>
+    <button class="btn btn-primary btn-sm" id="install-btn" hidden>Instalar</button>
+    <button class="btn btn-sm" id="install-close" aria-label="Fechar aviso">✕</button>
+  </div>
+
+  <!-- Regime legal -->
+  <section class="card" id="law-card">
+    <h2>Regime legal da jornada — Emenda Constitucional 141/2026</h2>
+    <div class="sub">O sistema aplica automaticamente o limite vigente em cada semana da escala, conforme as datas configuradas.</div>
+    <div class="law" id="law-steps"></div>
+    <div class="note" id="law-note"></div>
+  </section>
+
+  <nav class="tabs no-print">
+    <button data-tab="escala" class="active">Escala do mês</button>
+    <button data-tab="funcs">Colaboradores</button>
+    <button data-tab="impacto">Impacto da nova lei</button>
+    <button data-tab="config">Configurações</button>
+  </nav>
+
+  <!-- ESCALA -->
+  <section class="tab active" id="tab-escala">
+    <div class="print-head">
+      <h2 id="print-title"></h2>
+    </div>
+    <div class="toolbar">
+      <div class="month-nav">
+        <button class="btn btn-sm" onclick="shiftMonth(-1)" aria-label="Mês anterior">‹</button>
+        <strong id="month-label"></strong>
+        <button class="btn btn-sm" onclick="shiftMonth(1)" aria-label="Próximo mês">›</button>
+        <input type="month" id="month-input" onchange="setMonth(this.value)">
+      </div>
+      <span class="spacer"></span>
+      <button class="btn" onclick="resetMonth()" title="Remove os ajustes manuais das semanas exibidas">Restaurar padrão do mês</button>
+      <button class="btn" onclick="exportCSV()">Exportar CSV</button>
+      <button class="btn" onclick="printPage()">Imprimir / PDF</button>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="grid-wrap"><table class="grid" id="grid"></table></div>
+    <div class="legend">
+      <span><i class="c-T"></i>Trabalho (horas)</span>
+      <span><i class="c-F"></i>F · Folga/descanso semanal</span>
+      <span><i class="c-FR"></i>FR · Folga de feriado</span>
+      <span><i class="c-FE"></i>FE · Férias</span>
+      <span><i class="c-AT"></i>AT · Atestado/afastamento</span>
+      <span><i class="c-FT"></i>FT · Falta</span>
+      <span><i style="box-shadow:inset 0 0 0 2px var(--danger)"></i>Irregular</span>
+      <span><i style="box-shadow:inset 0 0 0 2px var(--warning)"></i>Atenção</span>
+      <span>● ajuste manual</span>
+      <span>Clique em um dia para alterar.</span>
+    </div>
+
+    <div class="card alerts">
+      <div class="alerts-head">
+        <h3>Conferência legal da escala</h3>
+        <span class="pill erro" data-lv="erro"></span>
+        <span class="pill aviso" data-lv="aviso"></span>
+        <span class="pill info" data-lv="info"></span>
+      </div>
+      <div id="alert-list"></div>
+    </div>
+  </section>
+
+  <!-- COLABORADORES -->
+  <section class="tab" id="tab-funcs">
+    <div class="card">
+      <h2 id="form-title">Novo colaborador</h2>
+      <div class="sub" style="margin-bottom:14px">Defina a escala-padrão; ajustes de dias específicos são feitos direto na grade.</div>
+      <form class="form" id="func-form" onsubmit="saveFunc(event)">
+        <input type="hidden" id="ff-id">
+        <label>Nome<input id="ff-nome" required></label>
+        <label>Cargo<input id="ff-cargo"></label>
+        <label>Setor<input id="ff-setor"></label>
+        <label>Escala
+          <select id="ff-escala" onchange="presetEscala()"></select>
+        </label>
+        <label>Entrada<input type="time" id="ff-entrada" value="08:00" required></label>
+        <label>Saída<input type="time" id="ff-saida" value="17:00" required></label>
+        <label>Intervalo (min)<input type="number" id="ff-intervalo" min="0" max="240" value="60"></label>
+        <label>Grupo de revezamento
+          <input type="number" id="ff-offset" min="0" max="6" value="0">
+          <span class="help">Grupos diferentes alternam as folgas entre si.</span>
+        </label>
+        <div class="full" id="ff-days-wrap" hidden>
+          <label>Dias trabalhados</label>
+          <div class="days" id="ff-days"></div>
+        </div>
+        <label>Salário mensal (R$)<input type="number" id="ff-salario" min="0" step="0.01" placeholder="opcional"></label>
+        <label class="chk" style="align-self:end"><input type="checkbox" id="ff-comp"> Acordo de compensação de jornada</label>
+        <label class="chk full"><input type="checkbox" id="ff-exc"> Possível exceção da EC 141 (nível superior + salário ≥ aprox. R$ 21.188,00) — excessos viram “atenção” em vez de “irregular”; confirme o alcance no texto oficial</label>
+        <div class="full" style="display:flex;gap:8px">
+          <button class="btn btn-primary" type="submit" id="ff-submit">Adicionar colaborador</button>
+          <button class="btn" type="button" onclick="clearForm()">Limpar</button>
+        </div>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Colaboradores cadastrados</h2>
+      <div class="table-scroll" style="margin-top:10px"><table class="list" id="func-list"></table></div>
+    </div>
+  </section>
+
+  <!-- IMPACTO -->
+  <section class="tab" id="tab-impacto">
+    <div class="kpis" id="imp-kpis"></div>
+    <div class="card">
+      <h2>Adequação de cada colaborador às etapas da EC 141/2026</h2>
+      <div class="sub">Baseado na escala-padrão (sem ajustes manuais e sem feriados), em média por semana. A redução de jornada não permite redução de salário.</div>
+      <div class="table-scroll" style="margin-top:12px"><table class="list" id="imp-table"></table></div>
+      <div class="note">
+        <strong>Como os valores são calculados:</strong> divisor mensal = jornada semanal × 5 (ex.: 220 para 44h, 210 para 42h, 200 para 40h). A estimativa de hora extra considera o excesso semanal × 30/7 semanas × valor-hora × 1,5 (adicional mínimo de 50%, CF art. 7º, XVI). São estimativas para planejamento — normas coletivas podem prever adicionais e divisores diferentes. Para 12x36 o divisor varia conforme a norma coletiva e não é calculado.
+      </div>
+    </div>
+  </section>
+
+  <!-- CONFIG -->
+  <section class="tab" id="tab-config">
+    <div class="card">
+      <h2>Empresa</h2>
+      <div class="form" style="margin-top:12px">
+        <label class="full">Nome da empresa (aparece na impressão)<input id="cf-empresa" oninput="setCfg('empresa',this.value,true)"></label>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Datas da transição (EC 141/2026)</h2>
+      <div class="sub">Os valores-padrão seguem o noticiado pelo Congresso: promulgação em 16/10/2026, 42h após 60 dias e 40h após mais 12 meses. As fontes divergem em ±1 dia na contagem — confira no texto publicado no Diário Oficial e ajuste se necessário.</div>
+      <div class="form" style="margin-top:12px">
+        <label>Promulgação<input type="date" id="cf-prom" onchange="setCfg('promulgacao',this.value)"></label>
+        <label>Etapa 1 — 42h e 2 descansos<input type="date" id="cf-e1" onchange="setCfg('etapa1',this.value)"></label>
+        <label>Etapa 2 — 40h<input type="date" id="cf-e2" onchange="setCfg('etapa2',this.value)"></label>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Regras da conferência</h2>
+      <div class="form" style="margin-top:12px">
+        <label>Folga em domingo ao menos 1 vez a cada (semanas)
+          <input type="number" id="cf-dom" min="1" max="8" onchange="setCfg('domingoN',Math.max(1,+this.value||3))">
+          <span class="help">3 = regra do comércio (Lei 10.101/2000, art. 6º, p.ú.). Ajuste conforme sua norma coletiva.</span>
+        </label>
+        <label>Mínimo de pessoas trabalhando por dia
+          <input type="number" id="cf-min" min="0" onchange="setCfg('minDia',Math.max(0,+this.value||0))">
+          <span class="help">0 = não conferir cobertura.</span>
+        </label>
+        <label class="chk" style="align-self:center"><input type="checkbox" id="cf-ferfolga" onchange="setCfg('folgaFeriado',this.checked)"> Folga automática em feriados (exceto 12x36)</label>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Feriados estaduais / municipais e pontos facultativos</h2>
+      <div class="sub">Feriados nacionais já são considerados automaticamente (incluindo 20/11 — Consciência Negra e a Paixão de Cristo). Carnaval e Corpus Christi não são feriados nacionais; inclua-os aqui se valerem na sua cidade.</div>
+      <div class="toolbar" style="margin-top:12px">
+        <input type="date" id="cf-fer-data">
+        <input id="cf-fer-nome" placeholder="Nome do feriado">
+        <button class="btn" onclick="addFeriado()">Adicionar</button>
+      </div>
+      <table class="list" id="fer-list"></table>
+    </div>
+    <div class="card">
+      <h2>Dados</h2>
+      <div class="sub" style="margin-bottom:12px">Os dados ficam salvos neste navegador. Faça backup para levar a outro computador.</div>
+      <div class="toolbar">
+        <button class="btn" onclick="exportJSON()">Baixar backup (.json)</button>
+        <button class="btn" onclick="document.getElementById('import-file').click()">Importar backup</button>
+        <input type="file" id="import-file" accept=".json,application/json" hidden onchange="importJSON(this)">
+        <button class="btn btn-danger" onclick="wipeAll()">Apagar todos os dados</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Cell editor -->
+<div class="modal-bg" id="cell-modal" hidden onclick="if(event.target===this)closeCell()">
+  <div class="modal">
+    <h3 id="cm-title"></h3>
+    <p id="cm-sub"></p>
+    <div class="codes" id="cm-codes"></div>
+    <div class="times" id="cm-times">
+      <label>Entrada<input type="time" id="cm-e"></label>
+      <label>Saída<input type="time" id="cm-s"></label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="resetCell()">Restaurar padrão</button>
+      <span style="flex:1"></span>
+      <button class="btn" onclick="closeCell()">Cancelar</button>
+      <button class="btn btn-primary" onclick="applyCell()">Aplicar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===========================================================
+   CONSTANTES
+   =========================================================== */
+const LS_KEY = 'contad_escala_v1';
+const DAY = 864e5;
+const EPOCH = Date.UTC(2024, 0, 1); // segunda-feira, referência para rodízios
+const DOW = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+const DOW1 = ['S','T','Q','Q','S','S','D'];
+const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const RANK = {info:1, aviso:2, erro:3};
+// No app Android, a página roda num WebView que expõe a ponte AndroidApp
+// para salvar arquivos e imprimir.
+const APP = window.AndroidApp || null;
+if(APP) document.documentElement.classList.add('in-app');
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const STANDALONE = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+// O link para o CONTAD só faz sentido quando a página é aberta dentro do repositório (pasta docs/).
+if(STANDALONE || !/\/docs\/(index\.html)?$/.test(location.pathname)) document.documentElement.classList.add('no-contad');
+const LV_LABEL = {erro:'Irregular', aviso:'Atenção', info:'Informativo'};
+
+const ESCALAS = {
+  '5x2':   {nome:'5x2 fixa (seg–sex)',                     e:'08:00', s:'17:00', i:60, comp:false},
+  '5x2r':  {nome:'5x2 com revezamento (cobre fim de semana)', e:'08:00', s:'17:00', i:60, comp:false},
+  '4x3':   {nome:'4x3 (4 dias de 10h)',                    e:'07:00', s:'18:00', i:60, comp:true},
+  '12x36': {nome:'12x36',                                  e:'07:00', s:'19:00', i:60, comp:false},
+  '6x1':   {nome:'6x1 (regime antigo)',                    e:'08:00', s:'16:20', i:60, comp:false},
+  'custom':{nome:'Personalizada (escolher dias)',          e:'08:00', s:'17:00', i:60, comp:false}
+};
+const CODES = {
+  T:  {nome:'Trabalho'},
+  F:  {nome:'Folga'},
+  FR: {nome:'Folga feriado'},
+  FE: {nome:'Férias'},
+  AT: {nome:'Atestado'},
+  FT: {nome:'Falta'}
+};
+
+/* ===========================================================
+   DATAS E HORAS
+   =========================================================== */
+const dkey = ms => new Date(ms).toISOString().slice(0,10);
+const kms = k => { const [y,m,d] = k.split('-').map(Number); return Date.UTC(y, m-1, d); };
+const dow = ms => (new Date(ms).getUTCDay() + 6) % 7; // 0 = segunda
+const fmtBR = k => k ? k.split('-').reverse().join('/') : '';
+const tmin = t => { const [h,m] = String(t||'0:0').split(':').map(Number); return (h||0)*60 + (m||0); };
+const spanMin = (e,s) => ((tmin(s) - tmin(e) + 1440) % 1440) || 1440;
+function fmtH(min){
+  const neg = min < 0; min = Math.abs(Math.round(min));
+  const h = Math.floor(min/60), m = min % 60;
+  return (neg?'-':'') + h + 'h' + (m ? String(m).padStart(2,'0') : '');
+}
+const money = v => (v||0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function easter(y){ // algoritmo de Meeus/Jones/Butcher
+  const a=y%19, b=Math.floor(y/100), c=y%100, d=Math.floor(b/4), e=b%4, f=Math.floor((b+8)/25),
+        g=Math.floor((b-f+1)/3), h=(19*a+b-d-g+15)%30, i=Math.floor(c/4), k=c%4,
+        l=(32+2*e+2*i-h-k)%7, m=Math.floor((a+11*h+22*l)/451),
+        mo=Math.floor((h+l-7*m+114)/31), da=((h+l-7*m+114)%31)+1;
+  return Date.UTC(y, mo-1, da);
+}
+const _fer = {};
+function feriadosNacionais(y){
+  if(_fer[y]) return _fer[y];
+  const m = {};
+  [['01-01','Confraternização Universal'],['04-21','Tiradentes'],['05-01','Dia do Trabalho'],
+   ['09-07','Independência'],['10-12','Nossa Senhora Aparecida'],['11-02','Finados'],
+   ['11-15','Proclamação da República'],['11-20','Consciência Negra'],['12-25','Natal']]
+    .forEach(([d,n]) => m[`${y}-${d}`] = n);
+  m[dkey(easter(y) - 2*DAY)] = 'Paixão de Cristo';
+  return _fer[y] = m;
+}
+function feriado(k){
+  const ex = state.cfg.extras.find(x => x.data === k);
+  return ex ? ex.nome : (feriadosNacionais(+k.slice(0,4))[k] || null);
+}
+
+/* ===========================================================
+   ESTADO
+   =========================================================== */
+function demoFuncs(){
+  const f = (nome,cargo,setor,escala,offset,salario) => {
+    const p = ESCALAS[escala];
+    return {id:newId(), nome, cargo, setor, escala, entrada:p.e, saida:p.s, intervalo:p.i,
+            offset, compensacao:p.comp, excecao:false, salario, dias:[1,1,1,1,1,0,0]};
+  };
+  return [
+    f('Ana Souza (exemplo)','Atendente','Loja','5x2r',0,2200),
+    f('Bruno Lima (exemplo)','Atendente','Loja','5x2r',1,2200),
+    f('Carla Mendes (exemplo)','Auxiliar administrativo','Escritório','5x2',0,2600),
+    f('Diego Santos (exemplo)','Vigilante','Portaria','12x36',0,2400),
+    f('Elisa Rocha (exemplo)','Repositora','Estoque','6x1',0,2000)
+  ];
+}
+function newId(){ return 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function defaultState(){
+  const now = new Date();
+  return {
+    empresa:'',
+    mes:`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`,
+    cfg:{promulgacao:'2026-10-16', etapa1:'2026-12-15', etapa2:'2027-12-15',
+         domingoN:3, minDia:0, folgaFeriado:true, extras:[]},
+    funcs:demoFuncs(),
+    cells:{}
+  };
+}
+let state;
+function load(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){
+      const s = JSON.parse(raw), d = defaultState();
+      state = {...d, ...s, cfg:{...d.cfg, ...(s.cfg||{})}, cells:s.cells||{}, funcs:s.funcs||[]};
+      return;
+    }
+  }catch(e){ /* armazenamento indisponível: segue com padrão */ }
+  state = defaultState();
+}
+function save(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
+}
+
+/* ===========================================================
+   REGIME LEGAL
+   =========================================================== */
+function regime(k){
+  const c = state.cfg;
+  if(k >= c.etapa2) return {lim:40*60, folgas:2, curto:'40h', nome:'EC 141 · jornada final', etapa:2};
+  if(k >= c.etapa1) return {lim:42*60, folgas:2, curto:'42h', nome:'EC 141 · transição', etapa:1};
+  return {lim:44*60, folgas:1, curto:'44h', nome:'regra anterior', etapa:0};
+}
+
+/* ===========================================================
+   PADRÃO DE ESCALA
+   =========================================================== */
+const mod = (a,n) => ((a % n) + n) % n;
+function pattern(f, ms, semFeriado){
+  const d = dow(ms), off = +f.offset || 0;
+  let work;
+  switch(f.escala){
+    case '5x2': work = d < 5; break;
+    case '5x2r': {
+      // Uma folga entre seg–qua e outra entre qui–dom: nunca mais de 5 dias seguidos.
+      // A cada N semanas a segunda folga cai no domingo.
+      const N = Math.max(1, +state.cfg.domingoN || 3);
+      const w = Math.floor((ms - EPOCH) / (7*DAY));
+      const r = mod(w + off, N);
+      const f1 = mod(off + r, 3), f2 = r === 0 ? 6 : 3 + mod(off + r, 3);
+      work = d !== f1 && d !== f2;
+      break;
+    }
+    case '4x3': { const s = mod(off, 4); work = d >= s && d < s + 4; break; }
+    case '12x36': work = mod(Math.floor((ms - EPOCH) / DAY) + off, 2) === 0; break;
+    case '6x1': work = d !== mod(6 - off, 7); break;
+    default: work = !!(f.dias || [])[d];
+  }
+  if(work && !semFeriado && state.cfg.folgaFeriado && f.escala !== '12x36' && feriado(dkey(ms))) return {c:'FR'};
+  return {c: work ? 'T' : 'F'};
+}
+function cell(f, k){
+  const o = state.cells[f.id] && state.cells[f.id][k];
+  const c = o ? {...o, ov:true} : pattern(f, kms(k));
+  if(c.c === 'T'){ c.e = c.e || f.entrada; c.s = c.s || f.saida; }
+  return c;
+}
+function workMin(f, c){
+  if(c.c !== 'T') return 0;
+  return Math.max(0, spanMin(c.e, c.s) - (+f.intervalo || 0));
+}
+
+/* ===========================================================
+   PERÍODO EXIBIDO (semanas completas seg–dom)
+   =========================================================== */
+function monthRange(){
+  const [y,m] = state.mes.split('-').map(Number);
+  const first = Date.UTC(y, m-1, 1), last = Date.UTC(y, m, 0);
+  const start = first - dow(first)*DAY, end = last + (6 - dow(last))*DAY;
+  const days = [];
+  for(let t = start; t <= end; t += DAY) days.push(t);
+  return {y, m, first, last, days};
+}
+
+/* ===========================================================
+   CONFERÊNCIA LEGAL
+   =========================================================== */
+function validate(days, first, last){
+  const alerts = [], mark = {};
+  const nW = days.length / 7;
+  const push = (f, level, k, msg, base, marks) => {
+    alerts.push({f, level, k, msg, base});
+    (marks || (k ? [k] : [])).forEach(mk => {
+      mark[f.id] = mark[f.id] || {};
+      const cur = mark[f.id][mk];
+      if(!cur || RANK[level] > RANK[cur]) mark[f.id][mk] = level;
+    });
+  };
+
+  for(const f of state.funcs){
+    const cs = days.map(ms => { const k = dkey(ms); return {ms, k, ...cell(f, k)}; });
+    const is1236 = f.escala === '12x36';
+    const iv = +f.intervalo || 0;
+
+    // Regras diárias
+    cs.forEach((c, i) => {
+      if(c.c !== 'T') return;
+      const wm = workMin(f, c);
+      if(is1236){
+        if(wm > 12*60) push(f,'erro',c.k,`Jornada de ${fmtH(wm)} acima de 12h no regime 12x36.`,'CLT art. 59-A');
+      } else if(wm > 10*60){
+        push(f,'erro',c.k,`Jornada diária de ${fmtH(wm)} ultrapassa 10h (8h + no máximo 2h extras).`,'CLT art. 59');
+      } else if(wm > 8*60 && !f.compensacao){
+        push(f,'aviso',c.k,`Jornada diária de ${fmtH(wm)} acima de 8h: exige acordo de compensação/negociação coletiva, senão é hora extra.`,'CF art. 7º, XIII; CLT art. 59');
+      }
+      if(wm > 6*60 && iv < 60) push(f,'erro',c.k,`Jornada acima de 6h exige intervalo mínimo de 1h (configurado: ${iv} min).`,'CLT art. 71');
+      else if(wm > 4*60 && wm <= 6*60 && iv < 15) push(f,'erro',c.k,`Jornada entre 4h e 6h exige intervalo mínimo de 15 min.`,'CLT art. 71, §1º');
+
+      const n = cs[i+1];
+      if(n && n.c === 'T'){
+        const gap = 1440 + tmin(n.e) - (tmin(c.e) + spanMin(c.e, c.s));
+        if(gap < 660) push(f,'erro',n.k,`Descanso entre jornadas de apenas ${fmtH(gap)} (mínimo 11h).`,'CLT art. 66');
+      }
+      const fer = feriado(c.k);
+      if(fer && !is1236 && c.ms >= first && c.ms <= last)
+        push(f,'info',c.k,`Trabalho no feriado (${fer}): pagar em dobro ou conceder folga compensatória.`,'Lei 605/1949, art. 9º');
+    });
+
+    // Dias consecutivos sem descanso
+    let run = 0;
+    cs.forEach(c => {
+      if(c.c === 'T' || c.c === 'FT'){ run++; if(run === 7) push(f,'erro',c.k,'7º dia consecutivo de trabalho sem folga.','CLT art. 67; OJ 410 SDI-1/TST'); }
+      else run = 0;
+    });
+
+    // Regras semanais
+    let totMin = 0, totRest = 0;
+    let avisou6x1 = false;
+    for(let w = 0; w < nW; w++){
+      const wk = cs.slice(w*7, w*7+7);
+      const reg = regime(wk[6].k);
+      const min = wk.reduce((a,c) => a + workMin(f,c), 0);
+      const rest = wk.filter(c => c.c === 'F').length;
+      const afast = wk.some(c => c.c === 'FE' || c.c === 'AT');
+      const lbl = `Semana ${fmtBR(wk[0].k).slice(0,5)}–${fmtBR(wk[6].k).slice(0,5)}`;
+      const tDays = wk.filter(c => c.c === 'T').map(c => c.k);
+      totMin += min; totRest += rest;
+
+      if(f.escala === '6x1' && reg.etapa >= 1 && !avisou6x1){
+        avisou6x1 = true;
+        push(f,'erro',null,`Escala 6x1 extinta a partir de ${fmtBR(state.cfg.etapa1)}: converta para 5x2, 4x3, 12x36 ou outra com 2 descansos semanais.`,'CF art. 7º, XV (EC 141/2026)');
+      }
+      if(is1236) continue;
+
+      if(min > reg.lim){
+        const lv = f.excecao ? 'aviso' : 'erro';
+        push(f, lv, null, `${lbl}: ${fmtH(min)} trabalhadas — limite ${reg.curto}/semana (${reg.nome})${f.excecao ? '; verifique se a exceção da EC 141 se aplica' : ''}.`,
+             reg.etapa ? 'CF art. 7º, XIII (EC 141/2026)' : 'CF art. 7º, XIII', tDays);
+      }
+      if(!afast && rest < reg.folgas){
+        push(f,'erro',null,`${lbl}: ${rest} folga(s) — mínimo de ${reg.folgas} descanso(s) semanal(is) remunerado(s)${reg.etapa ? ', um preferencialmente no domingo' : ''}.`,
+             reg.etapa ? 'CF art. 7º, XV (EC 141/2026)' : 'CF art. 7º, XV; Lei 605/1949', tDays);
+      }
+    }
+
+    // 12x36: média do período
+    if(is1236){
+      const reg = regime(cs[cs.length-1].k);
+      const avgMin = totMin / nW, avgRest = totRest / nW;
+      if(avgMin > reg.lim) push(f,'erro',null,`Média de ${fmtH(avgMin)}/semana no período — limite ${reg.curto}.`,'CF art. 7º, XIII; CLT art. 59-A');
+      if(avgRest < reg.folgas) push(f,'aviso',null,`Média de ${avgRest.toFixed(1).replace('.',',')} descansos/semana: a compensação na média do mês precisa estar prevista em acordo ou convenção coletiva.`,'EC 141/2026; CLT art. 59-A');
+    }
+
+    // Domingos
+    const N = Math.max(1, +state.cfg.domingoN || 3);
+    const domTrab = w => { const c = cs[w*7+6]; return c.c === 'T' || c.c === 'FT'; };
+    if(nW >= N && [...Array(nW).keys()].some(domTrab)){
+      for(let w = 0; w + N <= nW; w++){
+        let semFolga = true;
+        for(let j = w; j < w + N; j++) if(!domTrab(j)) { semFolga = false; break; }
+        if(semFolga){
+          const k = cs[(w+N-1)*7+6].k;
+          push(f,'aviso',k,`Sem folga em domingo por ${N} semanas seguidas (até ${fmtBR(k)}).`,'Lei 10.101/2000, art. 6º, p.ú.; descanso preferencialmente aos domingos (CF art. 7º, XV)');
+          w += N - 1;
+        }
+      }
+    }
+  }
+
+  // Cobertura mínima
+  const minDia = +state.cfg.minDia || 0;
+  const cover = days.map(ms => { const k = dkey(ms); return state.funcs.filter(f => cell(f,k).c === 'T').length; });
+  return {alerts, mark, cover, minDia};
+}
+
+/* ===========================================================
+   RENDER — LEI
+   =========================================================== */
+function renderLaw(){
+  const c = state.cfg, {first, last} = monthRange();
+  const a = dkey(first), b = dkey(last);
+  const active = i => {
+    const ranges = [[null, c.etapa1], [c.etapa1, c.etapa2], [c.etapa2, null]];
+    const [s,e] = ranges[i];
+    return (!s || b >= s) && (!e || a < e);
+  };
+  document.getElementById('law-steps').innerHTML = `
+    <div class="step"><div class="when">${fmtBR(c.promulgacao)} · promulgação</div>
+      <div class="what">EC 141/2026</div>
+      <div class="det">Fim da escala 6x1. Sem redução de salário. Cláusulas de acordos/convenções incompatíveis perdem efeito após 60 dias.</div></div>
+    <div class="step ${active(0)?'now':''}"><div class="when">até ${fmtBR(dkey(kms(c.etapa1)-DAY))}</div>
+      <div class="what">44h · 1 folga</div>
+      <div class="det">Regra anterior continua até a etapa 1 (8h/dia, 1 descanso semanal).</div></div>
+    <div class="step ${active(1)?'now':''}"><div class="when">a partir de ${fmtBR(c.etapa1)}</div>
+      <div class="what">42h · 2 folgas</div>
+      <div class="det">Dois descansos semanais remunerados, um preferencialmente no domingo. Negociação coletiva pode ampliar a jornada diária para acomodar as 42h.</div></div>
+    <div class="step ${active(2)?'now':''}"><div class="when">a partir de ${fmtBR(c.etapa2)}</div>
+      <div class="what">40h · 2 folgas</div>
+      <div class="det">Jornada máxima de 8h diárias e 40h semanais, com compensação por acordo ou convenção coletiva.</div></div>`;
+  const muda = [c.etapa1, c.etapa2].filter(d => d >= a && d <= b);
+  document.getElementById('law-note').innerHTML =
+    (muda.length ? `<strong>Atenção: o regime muda dentro deste mês (${muda.map(fmtBR).join(', ')}).</strong> Cada semana é conferida pelo limite vigente no domingo que a encerra.<br>` : '') +
+    `<strong>Importante:</strong> datas e regras foram configuradas a partir do noticiado pela Agência Senado e Agência Câmara (out/2026). Há divergência de ±1 dia entre fontes na contagem dos prazos, e o alcance exato das exceções (nível superior com salário elevado; adaptação futura para MEI e microempresas por lei complementar) e das regras para 12x36 depende do texto publicado. Confira a EC 141/2026 no Diário Oficial e a norma coletiva da categoria antes de aplicar. Esta ferramenta não substitui orientação jurídica.`;
+}
+
+/* ===========================================================
+   RENDER — ESCALA
+   =========================================================== */
+let alertFilter = null;
+function renderEscala(){
+  const {y, m, first, last, days} = monthRange();
+  document.getElementById('month-label').textContent = `${MESES[m-1][0].toUpperCase() + MESES[m-1].slice(1)} de ${y}`;
+  document.getElementById('month-input').value = state.mes;
+  document.getElementById('print-title').textContent =
+    `Escala de trabalho — ${MESES[m-1]} de ${y}${state.empresa ? ' — ' + state.empresa : ''}`;
+
+  const {alerts, mark, cover, minDia} = validate(days, first, last);
+  const inM = ms => ms >= first && ms <= last;
+
+  let h = '<thead><tr><th class="name">Colaborador</th>';
+  days.forEach(ms => {
+    const k = dkey(ms), d = dow(ms), fer = feriado(k);
+    const cls = [d===0?'wk':'', d===6?'dom':'', fer?'fer':'', inM(ms)?'':'out'].join(' ');
+    h += `<th class="${cls}" title="${esc(DOW[d] + ' ' + fmtBR(k) + (fer ? ' — ' + fer : ''))}">${DOW1[d]}<span class="n">${+k.slice(8)}</span></th>`;
+  });
+  h += '<th class="tot">Horas no mês</th><th class="tot">Folgas</th></tr></thead><tbody>';
+
+  if(!state.funcs.length){
+    h += `<tr><td class="empty" colspan="${days.length+3}">Nenhum colaborador cadastrado. Use a aba “Colaboradores”.</td></tr>`;
+  }
+  state.funcs.forEach(f => {
+    h += `<tr><td class="name"><b>${esc(f.nome)}</b><span>${esc([f.cargo, ESCALAS[f.escala]?.nome].filter(Boolean).join(' · '))}</span></td>`;
+    let tot = 0, folgas = 0;
+    days.forEach(ms => {
+      const k = dkey(ms), c = cell(f, k), d = dow(ms);
+      const wm = workMin(f, c);
+      if(inM(ms)){ tot += wm; if(c.c === 'F' || c.c === 'FR') folgas++; }
+      const mk = mark[f.id] && mark[f.id][k];
+      const cls = ['c', 'c-'+c.c, d===0?'wk':'', inM(ms)?'':'out', c.ov?'ov':'', mk?'m-'+mk:''].join(' ');
+      const txt = c.c === 'T' ? fmtH(wm) : c.c;
+      const tip = `${f.nome} — ${DOW[d]} ${fmtBR(k)}: ${CODES[c.c].nome}${c.c==='T' ? ` ${c.e}–${c.s}` : ''}`;
+      h += `<td class="${cls}" data-f="${f.id}" data-k="${k}" title="${esc(tip)}">${txt}</td>`;
+    });
+    h += `<td class="tot mono">${fmtH(tot)}</td><td class="tot mono">${folgas}</td></tr>`;
+  });
+  h += '</tbody>';
+  if(state.funcs.length){
+    h += '<tfoot><tr><td class="name">Trabalhando no dia</td>';
+    days.forEach((ms,i) => {
+      const low = minDia && inM(ms) && cover[i] < minDia;
+      h += `<td class="${dow(ms)===0?'wk':''} ${inM(ms)?'':'out'} ${low?'low':''}" title="${low ? 'Abaixo do mínimo configurado ('+minDia+')' : ''}">${cover[i]}</td>`;
+    });
+    h += '<td class="tot"></td><td class="tot"></td></tr></tfoot>';
+  }
+  document.getElementById('grid').innerHTML = h;
+
+  // KPIs
+  const cnt = lv => alerts.filter(a => a.level === lv).length;
+  const reg = regime(dkey(last));
+  const lowDays = minDia ? days.filter((ms,i) => inM(ms) && cover[i] < minDia).length : 0;
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi"><div class="v">${reg.curto}</div><div class="l">Limite semanal ao fim do mês · ${reg.folgas} descanso(s)/semana</div></div>
+    <div class="kpi ${cnt('erro')?'err':'ok'}"><div class="v">${cnt('erro')}</div><div class="l">Irregularidades</div></div>
+    <div class="kpi ${cnt('aviso')?'warn':'ok'}"><div class="v">${cnt('aviso')}</div><div class="l">Pontos de atenção</div></div>
+    <div class="kpi ${lowDays?'err':''}"><div class="v">${minDia ? lowDays : '—'}</div><div class="l">Dias abaixo da cobertura mínima</div></div>`;
+
+  // Alertas
+  ['erro','aviso','info'].forEach(lv => {
+    const p = document.querySelector(`.pill[data-lv="${lv}"]`);
+    p.textContent = `${LV_LABEL[lv]}: ${cnt(lv)}`;
+    p.classList.toggle('on', alertFilter === lv);
+  });
+  const list = alerts
+    .filter(a => !alertFilter || a.level === alertFilter)
+    .sort((a,b) => RANK[b.level] - RANK[a.level] || state.funcs.indexOf(a.f) - state.funcs.indexOf(b.f) || String(a.k).localeCompare(String(b.k)));
+  document.getElementById('alert-list').innerHTML = list.length
+    ? list.map(a => `<div class="alert ${a.level}"><span class="lv">${LV_LABEL[a.level]}</span>
+        <span class="who">${esc(a.f.nome)}${a.k ? `<span class="base">${DOW[dow(kms(a.k))]} ${fmtBR(a.k)}</span>` : ''}</span>
+        <span>${esc(a.msg)}<span class="base">${esc(a.base)}</span></span></div>`).join('')
+    : `<div class="empty">${alertFilter ? 'Nenhum item neste filtro.' : 'Nenhuma inconsistência encontrada na escala exibida.'}</div>`;
+}
+
+/* ===========================================================
+   EDIÇÃO DE CÉLULA
+   =========================================================== */
+let editing = null;
+document.getElementById('grid').addEventListener('click', ev => {
+  const td = ev.target.closest('td.c');
+  if(!td) return;
+  const f = state.funcs.find(x => x.id === td.dataset.f);
+  if(!f) return;
+  const k = td.dataset.k, c = cell(f, k);
+  editing = {f, k, code:c.c};
+  document.getElementById('cm-title').textContent = f.nome;
+  const fer = feriado(k);
+  document.getElementById('cm-sub').textContent =
+    `${DOW[dow(kms(k))]}, ${fmtBR(k)}${fer ? ' · feriado: ' + fer : ''} · regime ${regime(k).curto}`;
+  document.getElementById('cm-e').value = c.e || f.entrada;
+  document.getElementById('cm-s').value = c.s || f.saida;
+  drawCodes();
+  document.getElementById('cell-modal').hidden = false;
+});
+function drawCodes(){
+  document.getElementById('cm-codes').innerHTML = Object.keys(CODES).map(c =>
+    `<button type="button" class="c-${c} ${editing.code===c?'sel':''}" onclick="editing.code='${c}';drawCodes()">${c} · ${CODES[c].nome}</button>`).join('');
+  document.getElementById('cm-times').hidden = editing.code !== 'T';
+}
+function closeCell(){ document.getElementById('cell-modal').hidden = true; editing = null; }
+function applyCell(){
+  const {f, k, code} = editing, o = {c:code};
+  if(code === 'T'){
+    const e = document.getElementById('cm-e').value, s = document.getElementById('cm-s').value;
+    if(e !== f.entrada) o.e = e;
+    if(s !== f.saida) o.s = s;
+  }
+  const p = pattern(f, kms(k));
+  state.cells[f.id] = state.cells[f.id] || {};
+  if(p.c === o.c && !o.e && !o.s) delete state.cells[f.id][k];
+  else state.cells[f.id][k] = o;
+  save(); closeCell(); renderAll();
+}
+function resetCell(){
+  const {f, k} = editing;
+  if(state.cells[f.id]) delete state.cells[f.id][k];
+  save(); closeCell(); renderAll();
+}
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && editing) closeCell(); });
+
+/* ===========================================================
+   NAVEGAÇÃO / AÇÕES
+   =========================================================== */
+function setMonth(v){ if(/^\d{4}-\d{2}$/.test(v)){ state.mes = v; save(); renderAll(); } }
+function shiftMonth(n){
+  let [y,m] = state.mes.split('-').map(Number);
+  m += n; while(m < 1){ m += 12; y--; } while(m > 12){ m -= 12; y++; }
+  setMonth(`${y}-${String(m).padStart(2,'0')}`);
+}
+function resetMonth(){
+  if(!confirm('Remover todos os ajustes manuais das semanas exibidas?')) return;
+  const keys = monthRange().days.map(dkey);
+  Object.values(state.cells).forEach(m => keys.forEach(k => delete m[k]));
+  save(); renderAll();
+}
+document.querySelectorAll('.pill[data-lv]').forEach(p => p.addEventListener('click', () => {
+  alertFilter = alertFilter === p.dataset.lv ? null : p.dataset.lv; renderEscala();
+}));
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('active', x === b));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + b.dataset.tab));
+}));
+
+function download(name, content, type){
+  if(APP){ APP.saveFile(name, type, content); return; }
+  const blob = new Blob([content], {type});
+  // No iPhone/iPad, a folha de compartilhamento permite "Salvar em Arquivos", inclusive no app instalado.
+  if(IS_IOS && navigator.canShare){
+    const file = new File([blob], name, {type:type.split(';')[0]});
+    if(navigator.canShare({files:[file]})){ navigator.share({files:[file], title:name}).catch(() => {}); return; }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function printPage(){
+  if(APP) APP.print(document.getElementById('print-title').textContent || document.title);
+  else window.print();
+}
+function exportCSV(){
+  const {first, last} = monthRange();
+  const days = []; for(let t = first; t <= last; t += DAY) days.push(t);
+  const q = v => `"${String(v).replace(/"/g,'""')}"`;
+  const rows = [['Colaborador','Cargo','Setor','Escala', ...days.map(ms => fmtBR(dkey(ms)).slice(0,5) + ' ' + DOW[dow(ms)]), 'Horas no mês']];
+  state.funcs.forEach(f => {
+    let tot = 0;
+    const cols = days.map(ms => {
+      const c = cell(f, dkey(ms)); tot += workMin(f, c);
+      return c.c === 'T' ? `${c.e}-${c.s}` : c.c;
+    });
+    rows.push([f.nome, f.cargo, f.setor, ESCALAS[f.escala]?.nome || f.escala, ...cols, fmtH(tot)]);
+  });
+  download(`escala_${state.mes}.csv`, '﻿' + rows.map(r => r.map(q).join(';')).join('\r\n'), 'text/csv;charset=utf-8');
+}
+function exportJSON(){ download(`escala_backup_${dkey(Date.now())}.json`, JSON.stringify(state, null, 2), 'application/json'); }
+function importJSON(input){
+  const file = input.files[0]; if(!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      const s = JSON.parse(r.result);
+      if(!Array.isArray(s.funcs) || !s.cfg) throw new Error('formato');
+      const d = defaultState();
+      state = {...d, ...s, cfg:{...d.cfg, ...s.cfg}, cells:s.cells || {}};
+      save(); renderAll(); alert('Backup importado.');
+    }catch(e){ alert('Arquivo inválido: não é um backup desta escala.'); }
+    input.value = '';
+  };
+  r.readAsText(file);
+}
+function wipeAll(){
+  if(!confirm('Apagar todos os colaboradores, ajustes e configurações deste navegador?')) return;
+  state = defaultState(); state.funcs = []; save(); renderAll();
+}
+
+/* ===========================================================
+   COLABORADORES
+   =========================================================== */
+function initForm(){
+  document.getElementById('ff-escala').innerHTML =
+    Object.entries(ESCALAS).map(([k,v]) => `<option value="${k}">${v.nome}</option>`).join('');
+  document.getElementById('ff-days').innerHTML =
+    DOW.map((d,i) => `<label><input type="checkbox" data-d="${i}" ${i<5?'checked':''}> ${d}</label>`).join('');
+  document.getElementById('ff-escala').value = '5x2';
+}
+function presetEscala(){
+  const k = document.getElementById('ff-escala').value, p = ESCALAS[k];
+  document.getElementById('ff-entrada').value = p.e;
+  document.getElementById('ff-saida').value = p.s;
+  document.getElementById('ff-intervalo').value = p.i;
+  document.getElementById('ff-comp').checked = p.comp;
+  document.getElementById('ff-days-wrap').hidden = k !== 'custom';
+}
+function clearForm(){
+  document.getElementById('func-form').reset();
+  document.getElementById('ff-id').value = '';
+  document.getElementById('ff-escala').value = '5x2';
+  presetEscala();
+  document.querySelectorAll('#ff-days input').forEach(i => i.checked = +i.dataset.d < 5);
+  document.getElementById('form-title').textContent = 'Novo colaborador';
+  document.getElementById('ff-submit').textContent = 'Adicionar colaborador';
+}
+function saveFunc(ev){
+  ev.preventDefault();
+  const v = id => document.getElementById(id).value;
+  const id = v('ff-id') || newId();
+  const f = {
+    id, nome:v('ff-nome').trim(), cargo:v('ff-cargo').trim(), setor:v('ff-setor').trim(),
+    escala:v('ff-escala'), entrada:v('ff-entrada'), saida:v('ff-saida'),
+    intervalo:Math.max(0, +v('ff-intervalo') || 0), offset:Math.max(0, +v('ff-offset') || 0),
+    salario:+v('ff-salario') || 0,
+    compensacao:document.getElementById('ff-comp').checked,
+    excecao:document.getElementById('ff-exc').checked,
+    dias:[...document.querySelectorAll('#ff-days input')].map(i => i.checked ? 1 : 0)
+  };
+  if(f.escala === 'custom' && !f.dias.some(Boolean)){ alert('Selecione ao menos um dia trabalhado.'); return; }
+  const i = state.funcs.findIndex(x => x.id === id);
+  if(i >= 0) state.funcs[i] = f; else state.funcs.push(f);
+  save(); clearForm(); renderAll();
+}
+function editFunc(id){
+  const f = state.funcs.find(x => x.id === id); if(!f) return;
+  const set = (k,v) => document.getElementById(k).value = v;
+  set('ff-id', f.id); set('ff-nome', f.nome); set('ff-cargo', f.cargo || ''); set('ff-setor', f.setor || '');
+  set('ff-escala', f.escala); set('ff-entrada', f.entrada); set('ff-saida', f.saida);
+  set('ff-intervalo', f.intervalo); set('ff-offset', f.offset || 0); set('ff-salario', f.salario || '');
+  document.getElementById('ff-comp').checked = !!f.compensacao;
+  document.getElementById('ff-exc').checked = !!f.excecao;
+  document.querySelectorAll('#ff-days input').forEach(i => i.checked = !!(f.dias || [])[+i.dataset.d]);
+  document.getElementById('ff-days-wrap').hidden = f.escala !== 'custom';
+  document.getElementById('form-title').textContent = 'Editar colaborador';
+  document.getElementById('ff-submit').textContent = 'Salvar alterações';
+  window.scrollTo({top:document.getElementById('tab-funcs').offsetTop - 10, behavior:'smooth'});
+}
+function delFunc(id){
+  const f = state.funcs.find(x => x.id === id);
+  if(!f || !confirm(`Excluir ${f.nome}?`)) return;
+  state.funcs = state.funcs.filter(x => x.id !== id);
+  delete state.cells[id];
+  save(); renderAll();
+}
+function moveFunc(id, d){
+  const i = state.funcs.findIndex(x => x.id === id), j = i + d;
+  if(i < 0 || j < 0 || j >= state.funcs.length) return;
+  [state.funcs[i], state.funcs[j]] = [state.funcs[j], state.funcs[i]];
+  save(); renderAll();
+}
+function renderFuncs(){
+  const t = document.getElementById('func-list');
+  if(!state.funcs.length){ t.innerHTML = '<tr><td class="empty">Nenhum colaborador cadastrado.</td></tr>'; return; }
+  t.innerHTML = `<thead><tr><th>Nome</th><th>Cargo / setor</th><th>Escala</th><th>Horário</th><th>Grupo</th><th></th></tr></thead><tbody>` +
+    state.funcs.map(f => `<tr>
+      <td><b>${esc(f.nome)}</b></td>
+      <td>${esc([f.cargo, f.setor].filter(Boolean).join(' · ')) || '—'}</td>
+      <td>${esc(ESCALAS[f.escala]?.nome || f.escala)}${f.compensacao ? ' <span class="tag ok">compensação</span>' : ''}</td>
+      <td class="mono">${esc(f.entrada)}–${esc(f.saida)} <span class="help">(${f.intervalo} min int.)</span></td>
+      <td>${f.offset || 0}</td>
+      <td style="white-space:nowrap;text-align:right">
+        <button class="btn btn-sm" onclick="moveFunc('${f.id}',-1)" aria-label="Subir">↑</button>
+        <button class="btn btn-sm" onclick="moveFunc('${f.id}',1)" aria-label="Descer">↓</button>
+        <button class="btn btn-sm" onclick="editFunc('${f.id}')">Editar</button>
+        <button class="btn btn-sm btn-danger" onclick="delFunc('${f.id}')">Excluir</button>
+      </td></tr>`).join('') + '</tbody>';
+}
+
+/* ===========================================================
+   IMPACTO DA LEI
+   =========================================================== */
+function perfil(f){
+  // média semanal da escala-padrão em 12 semanas (cobre todos os rodízios)
+  let min = 0, folgas = 0;
+  const W = 12;
+  for(let t = EPOCH; t < EPOCH + W*7*DAY; t += DAY){
+    const c = pattern(f, t, true);
+    if(c.c === 'T'){ c.e = f.entrada; c.s = f.saida; min += workMin(f, c); }
+    else folgas++;
+  }
+  return {min:min/W, folgas:folgas/W};
+}
+function renderImpacto(){
+  const lims = [{lim:44*60, fol:1, nome:'Regra anterior · 44h'}, {lim:42*60, fol:2, nome:'Etapa 1 · 42h'}, {lim:40*60, fol:2, nome:'Etapa 2 · 40h'}];
+  let exc42 = 0, exc40 = 0, poucaFolga = 0, custo = 0;
+  const rows = state.funcs.map(f => {
+    const p = perfil(f), is1236 = f.escala === '12x36';
+    const status = lims.map(l => {
+      const probs = [];
+      if(p.min > l.lim + 0.5) probs.push(`excede ${fmtH(p.min - l.lim)}`);
+      if(p.folgas + 1e-9 < l.fol && !is1236) probs.push(`${p.folgas.toFixed(1).replace('.0','').replace('.',',')} folga/sem.`);
+      if(is1236 && p.folgas + 1e-9 < l.fol) probs.push('média de folgas exige ACT/CCT');
+      return probs.length ? `<span class="tag ${is1236 && !(p.min > l.lim + 0.5) ? 'warn' : 'bad'}">${probs.join(' · ')}</span>` : '<span class="tag ok">adequado</span>';
+    });
+    if(p.min > 42*60 + 0.5) exc42++;
+    if(p.min > 40*60 + 0.5) exc40++;
+    if(p.folgas + 1e-9 < 2 && !is1236) poucaFolga++;
+    let vh = '—', vh40 = '—', extra = '—';
+    if(f.salario && !is1236){
+      const hHoje = Math.min(p.min, 44*60) / 60, h40 = Math.min(p.min, 40*60) / 60;
+      const vHoje = f.salario / (hHoje * 5), v40 = f.salario / (h40 * 5);
+      vh = money(vHoje); vh40 = money(v40);
+      const exc = Math.max(0, p.min - 40*60) / 60;
+      const c = exc * (30/7) * v40 * 1.5;
+      custo += c;
+      extra = exc ? '≈ ' + money(c) : money(0);
+    }
+    return `<tr><td><b>${esc(f.nome)}</b><div class="help">${esc(ESCALAS[f.escala]?.nome || f.escala)}</div></td>
+      <td class="num mono">${fmtH(p.min)}</td>
+      <td>${status.join('</td><td>')}</td>
+      <td class="num">${f.salario ? money(f.salario) : '—'}</td>
+      <td class="num">${vh}</td><td class="num">${vh40}</td><td class="num">${extra}</td></tr>`;
+  });
+  document.getElementById('imp-table').innerHTML = state.funcs.length
+    ? `<thead><tr><th>Colaborador</th><th>Média/semana</th>${lims.map(l => `<th>${l.nome}</th>`).join('')}<th>Salário</th><th>Valor-hora hoje</th><th>Valor-hora em 40h</th><th>Hora extra/mês se nada mudar (40h)</th></tr></thead><tbody>${rows.join('')}</tbody>`
+    : '<tr><td class="empty">Nenhum colaborador cadastrado.</td></tr>';
+  document.getElementById('imp-kpis').innerHTML = `
+    <div class="kpi ${exc42?'err':'ok'}"><div class="v">${exc42}</div><div class="l">Acima de 42h (ajustar até ${fmtBR(state.cfg.etapa1)})</div></div>
+    <div class="kpi ${exc40?'warn':'ok'}"><div class="v">${exc40}</div><div class="l">Acima de 40h (ajustar até ${fmtBR(state.cfg.etapa2)})</div></div>
+    <div class="kpi ${poucaFolga?'err':'ok'}"><div class="v">${poucaFolga}</div><div class="l">Com menos de 2 folgas por semana</div></div>
+    <div class="kpi ${custo?'warn':'ok'}"><div class="v">${money(custo)}</div><div class="l">Hora extra estimada/mês se nada mudar (40h)</div></div>`;
+}
+
+/* ===========================================================
+   CONFIGURAÇÕES
+   =========================================================== */
+function setCfg(k, v, top){
+  if(top) state[k] = v; else state.cfg[k] = v;
+  if(state.cfg.etapa2 < state.cfg.etapa1) alert('A etapa 2 deve ser posterior à etapa 1.');
+  save();
+  if(top) renderEscalaTitleOnly(); else renderAll();
+}
+function renderEscalaTitleOnly(){
+  const {y, m} = monthRange();
+  document.getElementById('print-title').textContent =
+    `Escala de trabalho — ${MESES[m-1]} de ${y}${state.empresa ? ' — ' + state.empresa : ''}`;
+}
+function addFeriado(){
+  const d = document.getElementById('cf-fer-data').value, n = document.getElementById('cf-fer-nome').value.trim();
+  if(!d || !n){ alert('Informe data e nome.'); return; }
+  state.cfg.extras = state.cfg.extras.filter(x => x.data !== d).concat({data:d, nome:n}).sort((a,b) => a.data.localeCompare(b.data));
+  document.getElementById('cf-fer-data').value = ''; document.getElementById('cf-fer-nome').value = '';
+  save(); renderAll();
+}
+function delFeriado(d){ state.cfg.extras = state.cfg.extras.filter(x => x.data !== d); save(); renderAll(); }
+function renderConfig(){
+  const c = state.cfg;
+  document.getElementById('cf-empresa').value = state.empresa || '';
+  document.getElementById('cf-prom').value = c.promulgacao;
+  document.getElementById('cf-e1').value = c.etapa1;
+  document.getElementById('cf-e2').value = c.etapa2;
+  document.getElementById('cf-dom').value = c.domingoN;
+  document.getElementById('cf-min').value = c.minDia;
+  document.getElementById('cf-ferfolga').checked = !!c.folgaFeriado;
+  document.getElementById('fer-list').innerHTML = c.extras.length
+    ? '<thead><tr><th>Data</th><th>Feriado</th><th></th></tr></thead><tbody>' +
+      c.extras.map(x => `<tr><td class="mono">${fmtBR(x.data)}</td><td>${esc(x.nome)}</td><td style="text-align:right"><button class="btn btn-sm btn-danger" onclick="delFeriado('${x.data}')">Remover</button></td></tr>`).join('') + '</tbody>'
+    : '<tr><td class="empty">Nenhum feriado adicional.</td></tr>';
+}
+
+/* ===========================================================
+   APLICATIVO INSTALÁVEL (PWA)
+   =========================================================== */
+function initPWA(){
+  const web = location.protocol === 'https:' || location.hostname === 'localhost';
+  if(APP || !web) return;
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if(STANDALONE) return;
+  let dismissed = false;
+  try{ dismissed = localStorage.getItem('escala_install_dismiss') === '1'; }catch(e){}
+  if(dismissed) return;
+  const bar = document.getElementById('install-bar'), btn = document.getElementById('install-btn');
+  const show = txt => { document.getElementById('install-text').textContent = txt; bar.hidden = false; };
+  document.getElementById('install-close').onclick = () => {
+    bar.hidden = true;
+    try{ localStorage.setItem('escala_install_dismiss', '1'); }catch(e){}
+  };
+  if(IS_IOS){
+    show('Para instalar no iPhone/iPad: abra no Safari, toque em Compartilhar e depois em “Adicionar à Tela de Início”.');
+    return;
+  }
+  let prompt = null;
+  addEventListener('beforeinstallprompt', e => {
+    e.preventDefault(); prompt = e;
+    btn.hidden = false;
+    show('Instale a Escala como aplicativo neste aparelho — funciona sem internet.');
+  });
+  btn.onclick = async () => {
+    if(!prompt) return;
+    prompt.prompt();
+    await prompt.userChoice.catch(() => {});
+    prompt = null; bar.hidden = true;
+  };
+  addEventListener('appinstalled', () => { bar.hidden = true; });
+}
+
+/* ===========================================================
+   INIT
+   =========================================================== */
+function renderAll(){ renderLaw(); renderEscala(); renderFuncs(); renderImpacto(); renderConfig(); }
+load();
+initForm();
+presetEscala();
+renderAll();
+initPWA();
+</script>
+</body>
+</html>
