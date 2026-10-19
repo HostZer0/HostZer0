@@ -193,6 +193,7 @@ table.list{width:100%;border-collapse:collapse;font-size:13px}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 .print-head{display:none}
+.in-app .back{display:none}
 </style>
 </head>
 <body>
@@ -238,7 +239,7 @@ table.list{width:100%;border-collapse:collapse;font-size:13px}
       <span class="spacer"></span>
       <button class="btn" onclick="resetMonth()" title="Remove os ajustes manuais das semanas exibidas">Restaurar padrão do mês</button>
       <button class="btn" onclick="exportCSV()">Exportar CSV</button>
-      <button class="btn" onclick="window.print()">Imprimir / PDF</button>
+      <button class="btn" onclick="printPage()">Imprimir / PDF</button>
     </div>
 
     <div class="kpis" id="kpis"></div>
@@ -404,6 +405,10 @@ const DOW = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 const DOW1 = ['S','T','Q','Q','S','S','D'];
 const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 const RANK = {info:1, aviso:2, erro:3};
+// No app Android, a página roda num WebView que expõe a ponte AndroidApp
+// para salvar arquivos e imprimir.
+const APP = window.AndroidApp || null;
+if(APP) document.documentElement.classList.add('in-app');
 const LV_LABEL = {erro:'Irregular', aviso:'Atenção', info:'Informativo'};
 
 const ESCALAS = {
@@ -856,10 +861,15 @@ document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click
 }));
 
 function download(name, content, type){
+  if(APP){ APP.saveFile(name, type, content); return; }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([content], {type}));
   a.download = name; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function printPage(){
+  if(APP) APP.print(document.getElementById('print-title').textContent || document.title);
+  else window.print();
 }
 function exportCSV(){
   const {first, last} = monthRange();
