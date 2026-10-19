@@ -2,8 +2,17 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>CONTAD · Escala de Trabalho</title>
+<meta name="description" content="Escala de trabalho conferida pelas regras da EC 141/2026 (fim da escala 6x1).">
+<meta name="theme-color" content="#0c1729">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Escala">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -35,14 +44,18 @@ body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(-
 .mono{font-family:'JetBrains Mono',ui-monospace,monospace}
 
 /* Header */
-.top{background:var(--sidebar);color:#cbd5e1;padding:14px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.top{background:var(--sidebar);color:#cbd5e1;padding:14px max(24px, env(safe-area-inset-right)) 14px max(24px, env(safe-area-inset-left));display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .brand-mark{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#10b981,#047857);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff}
 .top h1{font-size:16px;color:#fff;font-weight:800;letter-spacing:.01em}
 .top p{font-size:12px;color:#94a3b8}
 .top .back{margin-left:auto;color:#34d399;text-decoration:none;font-weight:600;font-size:13px}
 .top .back:hover{text-decoration:underline}
 
-.wrap{max-width:1500px;margin:0 auto;padding:20px 24px 60px}
+.wrap{max-width:1500px;margin:0 auto;padding:20px max(24px, env(safe-area-inset-right)) calc(60px + env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left))}
+
+/* Convite para instalar */
+.install-bar{display:flex;align-items:center;gap:10px;background:var(--brand-soft);border:1px solid #a7f3d0;color:#065f46;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:13px;font-weight:600}
+.install-bar span{flex:1}
 
 /* Cards */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:18px 20px;margin-bottom:18px}
@@ -193,7 +206,7 @@ table.list{width:100%;border-collapse:collapse;font-size:13px}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 .print-head{display:none}
-.in-app .back{display:none}
+.in-app .back,.no-contad .back{display:none}
 </style>
 </head>
 <body>
@@ -204,10 +217,16 @@ table.list{width:100%;border-collapse:collapse;font-size:13px}
     <h1>Escala de Trabalho</h1>
     <p>Departamento Pessoal · atualizado para a EC 141/2026 (fim da escala 6x1)</p>
   </div>
-  <a class="back" href="index.html">← Voltar ao CONTAD</a>
+  <a class="back" href="../index.html">← Voltar ao CONTAD</a>
 </header>
 
 <div class="wrap">
+
+  <div class="install-bar no-print" id="install-bar" hidden>
+    <span id="install-text"></span>
+    <button class="btn btn-primary btn-sm" id="install-btn" hidden>Instalar</button>
+    <button class="btn btn-sm" id="install-close" aria-label="Fechar aviso">✕</button>
+  </div>
 
   <!-- Regime legal -->
   <section class="card" id="law-card">
@@ -409,6 +428,10 @@ const RANK = {info:1, aviso:2, erro:3};
 // para salvar arquivos e imprimir.
 const APP = window.AndroidApp || null;
 if(APP) document.documentElement.classList.add('in-app');
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const STANDALONE = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+// O link para o CONTAD só faz sentido quando a página é aberta dentro do repositório (pasta docs/).
+if(STANDALONE || !/\/docs\/(index\.html)?$/.test(location.pathname)) document.documentElement.classList.add('no-contad');
 const LV_LABEL = {erro:'Irregular', aviso:'Atenção', info:'Informativo'};
 
 const ESCALAS = {
@@ -862,8 +885,14 @@ document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click
 
 function download(name, content, type){
   if(APP){ APP.saveFile(name, type, content); return; }
+  const blob = new Blob([content], {type});
+  // No iPhone/iPad, a folha de compartilhamento permite "Salvar em Arquivos", inclusive no app instalado.
+  if(IS_IOS && navigator.canShare){
+    const file = new File([blob], name, {type:type.split(';')[0]});
+    if(navigator.canShare({files:[file]})){ navigator.share({files:[file], title:name}).catch(() => {}); return; }
+  }
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([content], {type}));
+  a.href = URL.createObjectURL(blob);
   a.download = name; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
@@ -1090,6 +1119,42 @@ function renderConfig(){
 }
 
 /* ===========================================================
+   APLICATIVO INSTALÁVEL (PWA)
+   =========================================================== */
+function initPWA(){
+  const web = location.protocol === 'https:' || location.hostname === 'localhost';
+  if(APP || !web) return;
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if(STANDALONE) return;
+  let dismissed = false;
+  try{ dismissed = localStorage.getItem('escala_install_dismiss') === '1'; }catch(e){}
+  if(dismissed) return;
+  const bar = document.getElementById('install-bar'), btn = document.getElementById('install-btn');
+  const show = txt => { document.getElementById('install-text').textContent = txt; bar.hidden = false; };
+  document.getElementById('install-close').onclick = () => {
+    bar.hidden = true;
+    try{ localStorage.setItem('escala_install_dismiss', '1'); }catch(e){}
+  };
+  if(IS_IOS){
+    show('Para instalar no iPhone/iPad: abra no Safari, toque em Compartilhar e depois em “Adicionar à Tela de Início”.');
+    return;
+  }
+  let prompt = null;
+  addEventListener('beforeinstallprompt', e => {
+    e.preventDefault(); prompt = e;
+    btn.hidden = false;
+    show('Instale a Escala como aplicativo neste aparelho — funciona sem internet.');
+  });
+  btn.onclick = async () => {
+    if(!prompt) return;
+    prompt.prompt();
+    await prompt.userChoice.catch(() => {});
+    prompt = null; bar.hidden = true;
+  };
+  addEventListener('appinstalled', () => { bar.hidden = true; });
+}
+
+/* ===========================================================
    INIT
    =========================================================== */
 function renderAll(){ renderLaw(); renderEscala(); renderFuncs(); renderImpacto(); renderConfig(); }
@@ -1097,6 +1162,7 @@ load();
 initForm();
 presetEscala();
 renderAll();
+initPWA();
 </script>
 </body>
 </html>

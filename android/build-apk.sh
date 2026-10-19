@@ -51,7 +51,7 @@ rm -rf "$BUILD"
 mkdir -p "$BUILD/assets" "$BUILD/classes" "$BUILD/signer" "$DIST"
 
 echo "1/5 Recursos e manifesto (aapt2)"
-cp "$ROOT/../escala.html" "$BUILD/assets/escala.html"
+cp "$ROOT/../docs/index.html" "$BUILD/assets/index.html"
 "$AAPT2" compile --dir "$ROOT/res" -o "$BUILD/res.zip"
 "$AAPT2" link -o "$BUILD/unsigned.apk" -I "$FRAMEWORK" \
   --manifest "$ROOT/AndroidManifest.xml" -A "$BUILD/assets" "$BUILD/res.zip"

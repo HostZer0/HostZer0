@@ -18,11 +18,11 @@ import android.widget.Toast;
 import java.io.OutputStream;
 
 /**
- * Abre a página escala.html (empacotada em assets) num WebView.
+ * Abre a página da escala (docs/index.html, empacotada em assets) num WebView.
  * A ponte "AndroidApp" permite à página salvar arquivos (CSV/backup) e imprimir.
  */
 public class MainActivity extends Activity {
-    private static final String START_URL = "file:///android_asset/escala.html";
+    private static final String START_URL = "file:///android_asset/index.html";
     private static final int REQ_SAVE = 1;
     private static final int REQ_OPEN = 2;
 
